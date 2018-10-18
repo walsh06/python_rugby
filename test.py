@@ -1,5 +1,7 @@
-from league import League
+import time
 
+from league import League
+from rugbydb import RugbyDB
 
 def checkResult(testName, func, args, expectedResult):
     try:
@@ -24,5 +26,17 @@ def testLeague():
     checkResult("All Match ids", l.getMatchIds, [], [5,6,7,8,1,2,3,4])
     checkResult("1819 Match ids", l.getMatchIds, ['1819'], [1,2,3,4])
 
+def testDB():
+    start = time.time()
+    db = RugbyDB()
+    end = time.time()
+    print "Database Load took {}s".format((end - start))
+    
+    start = time.time()
+    matches = db.getMatchesForTeam('munster')
+    end = time.time()
+    print "Database team search took {}s, found {} matches".format((end - start), len(matches))
+
 if __name__ == "__main__":
     testLeague()
+    testDB()
