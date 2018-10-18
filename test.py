@@ -1,6 +1,7 @@
 import time
 
 from league import League
+from match import MatchList
 from rugbydb import RugbyDB
 
 def checkResult(testName, func, args, expectedResult):
@@ -26,6 +27,16 @@ def testLeague():
     checkResult("All Match ids", l.getMatchIds, [], [5,6,7,8,1,2,3,4])
     checkResult("1819 Match ids", l.getMatchIds, ['1819'], [1,2,3,4])
 
+    start = time.time()
+    l = League('180659', 'Six Nations', initMatches=True)
+    end = time.time()
+    print "League Load took {}s".format((end - start))
+    print l.getMatchIds('2017')
+
+def testMatchList():
+    matchList = MatchList.createMatchListForTeam('munster')
+    print matchList.getMatchIds()
+
 def testDB():
     start = time.time()
     db = RugbyDB()
@@ -40,3 +51,5 @@ def testDB():
 if __name__ == "__main__":
     testLeague()
     testDB()
+    testMatchList()
+

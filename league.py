@@ -1,5 +1,7 @@
 from match import MatchList, MatchListLite
 
+from variables import MATCH_IDS
+
 class LeagueList():
 
     def __init__(self, leagueDict):
@@ -21,11 +23,13 @@ class LeagueList():
 
 class League():
 
-    def __init__(self, id, name, matchIdDict, initMatches=False):
+    def __init__(self, id, name, matchIdDict=None, initMatches=False):
         self.id = id
         self.name = name
         self._matchesLoaded = False
         self._matches = {}
+        if matchIdDict is None:
+            matchIdDict = MATCH_IDS[self.id]['matchIds']
         self.loadMatches(matchIdDict, initMatches)
 
     def loadMatches(self, matchIdDict, full=False):
