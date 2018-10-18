@@ -1,4 +1,4 @@
-from match import MatchList
+from match import MatchList, MatchListLite
 
 class LeagueList():
 
@@ -24,26 +24,35 @@ class League():
     def __init__(self, id, name, matchIdDict, initMatches=False):
         self.id = id
         self.name = name
-        self.matchIds = matchIdDict
         self._matchesLoaded = False
-        self.teams = []
-        if initMatches:
-            self.loadMatches()
-        else:
-            self.matches = None
-            
+        self._matches = {}
+        self.loadMatches(matchIdDict, initMatches)
 
-    def getMatchIds(self, season=None):
-        if season:
-            matchIdList = self.matchIds[season]
+    def loadMatches(self, matchIdDict, full=False):
+        if full:
+            matchListClass = MatchList
         else:
-            matchIdList = []
-            for season in self.matchIds.keys():
-                matchIdList.extend(self.matchIds[season])
+            matchListClass = MatchListLite
+        
+        for season in matchIdDict:
+            self._matches[season] = matchListClass(matchIdDict[season])
+
+    def _getSeasonList(self, season=None):
+        if season:
+            return [season]
+        else:
+            return self._matches.keys()
+    
+    def getMatchIds(self, season=None):
+        seasons = self._getSeasonList(season)
+        matchIdList = []
+        for season in seasons:
+            matchIdList.extend(self._matches[season].getMatchIds())
         return matchIdList
 
-    def loadMatches(self):
-        self.matches = MatchList(self.getMatchIds())
-
-    def containsTeam(self, team):
-        return team in self.teams
+    def containsTeam(self, team, season=None):
+        seasons = self._getSeasonList(season)
+        teams = []
+        for season in seasons:
+            teams.extend(self._matches[season].getAllTeams())
+        return team in teams

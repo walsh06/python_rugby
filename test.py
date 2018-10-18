@@ -19,7 +19,7 @@ def checkResult(testName, func, args, expectedResult):
     return success
 
 def testLeague():
-    l = League(1234, 'leagueOne', {'1819': [1,2,3,4], '1718': [5,6,7,8]}, True)
+    l = League(1234, 'leagueOne', {'1819': [1,2,3,4], '1718': [5,6,7,8]}, False)
 
     checkResult("All Match ids", l.getMatchIds, [], [5,6,7,8,1,2,3,4])
     checkResult("1819 Match ids", l.getMatchIds, ['1819'], [1,2,3,4])
