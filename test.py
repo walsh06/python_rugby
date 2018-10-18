@@ -4,6 +4,20 @@ from league import League
 from match import MatchList
 from rugbydb import RugbyDB
 
+class Timer():
+
+    def __init__(self, name):
+        self.name = name
+
+    def __enter__(self):
+        self.start = time.time()
+        return self
+
+    def __exit__(self, *args):
+        end = time.time()
+        print "Timer: {} - {}s".format(self.name, (end - self.start))
+
+
 def checkResult(testName, func, args, expectedResult):
     try:
         result = func(*args)
@@ -27,10 +41,8 @@ def testLeague():
     checkResult("All Match ids", l.getMatchIds, [], [5,6,7,8,1,2,3,4])
     checkResult("1819 Match ids", l.getMatchIds, ['1819'], [1,2,3,4])
 
-    start = time.time()
-    l = League('180659', 'Six Nations', initMatches=True)
-    end = time.time()
-    print "League Load took {}s".format((end - start))
+    with Timer('League Load') as t:
+        l = League('180659', 'Six Nations', initMatches=True)
     print l.getMatchIds('2017')
 
 def testMatchList():
@@ -38,15 +50,10 @@ def testMatchList():
     print matchList.getMatchIds()
 
 def testDB():
-    start = time.time()
-    db = RugbyDB()
-    end = time.time()
-    print "Database Load took {}s".format((end - start))
-    
-    start = time.time()
-    matches = db.getMatchesForTeam('munster')
-    end = time.time()
-    print "Database team search took {}s, found {} matches".format((end - start), len(matches))
+    with Timer('Database Load') as t:
+        db = RugbyDB()
+    with Timer('Team Search') as t:
+        matches = db.getMatchesForTeam('munster')
 
 if __name__ == "__main__":
     testLeague()
