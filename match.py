@@ -1,9 +1,21 @@
 from rugbydb import RugbyDB, CachedDB
 
 class MatchList():
+    """
+    Class to store and manipulate Match objects
+    """
 
     @classmethod
     def createMatchListForTeam(cls, teamName, leagues=None, seasons=None):
+        """
+        Create a match list for a specific team, filter by league or seasons
+        ARGS:
+            teamName (str) - name of the team
+            leagues ([int]) - list of league ids to filter by, search all leagues if None
+            seasons ([str]) - list of seasons to filter by, search all seasons if None
+        RETURNS
+            MatchList - MatchList object
+        """
         db = CachedDB()
         matchIds = db.getMatchesForTeam(teamName.lower(), leagues=leagues, seasons=seasons)
         return cls(matchIds)
@@ -13,6 +25,10 @@ class MatchList():
         pass
 
     def __init__(self, matchIds):
+        """
+        ARGS:
+            matchIds [int] - list of match ids to load into the matchlist
+        """
         self._matches = {}
         self._teams = None
         db = CachedDB()
@@ -20,15 +36,31 @@ class MatchList():
             self._matches[id] = Match.fromMatchDict(db.getMatchById(id))
     
     def __str__(self):
+        """
+        String representation of MatchList
+        """
         return "{}".format(self._matches.keys())
 
     def __len__(self):
+        """
+        Len representation of MatchList
+        """
         return len(self._matches.keys())
 
     def getMatchIds(self):
+        """
+        Return all match ids in the MatchList
+        RETURNS:
+            [int] - list of match ids
+        """
         return sorted(self._matches.keys())
 
     def getAllTeams(self):
+        """
+        Return list of teams that play in the MatchList
+        RETURNS:
+            [str] - list of team names
+        """
         if self._teams is None:
             self._teams = []
             for match in self._matches.items():
@@ -37,11 +69,24 @@ class MatchList():
 
 
 class MatchListLite(MatchList):
-
+    """
+    Lite version of MatchList which doesnt load all matches
+    Used to store matchIds only and overrides functionality 
+    that accessed Match object data
+    """
     def __init__(self, matchIds):
+        """
+        ARGS:
+            matchIds [int] - list of match ids to load into the matchlist
+        """
         self._matches = {el: None for el in matchIds}
 
     def getAllTeams(self):
+        """
+        Returns an empty list as MatchListLite does not have access to Match data
+        RETURNS:
+            [] - empty list
+        """
         return []
 
 
@@ -49,6 +94,13 @@ class Match():
 
     @classmethod
     def fromMatchDict(cls, matchDict):
+        """
+        Create a Match object from match dict loaded from the database
+        ARGS:
+            matchDict (dict) - full dictionary of a match loaded from the database
+        RETURNS
+            Match (obj) - Match object
+        """
         return cls(matchDict['gamePackage']['gameStrip']['teams']['home'], 
                   matchDict['gamePackage']['gameStrip']['teams']['away'],
                   matchDict['gamePackage']['gameStrip']['isoDate'],
@@ -77,7 +129,15 @@ class Match():
             #     self.players[team].append(Player.fromPlayerDict(player))
     
     def __str__(self):
+        """
+        String representation of a match
+        """
         return "{} v {} - {}".format(self.homeTeam['name'], self.awayTeam['name'], self.date)
 
     def getAllStatHeaders(self):
+        """
+        Return all possibles stats for the match
+        RETURNS:
+            [str] - list of stat headers for the match
+        """
         return self.matchStats.keys()
