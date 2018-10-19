@@ -68,17 +68,24 @@ class MatchList():
         return self._teams
 
     def __iter__(self):
+        """
+        Iterator implementation for MatchList
+        """
         self.currentMatchIndex = -1
         return self
 
     def next(self):
+        """
+        Iterator implementation for MatchList
+        RETURNS:
+            Match (obj) - returns next match object in list
+        """
         matchIds = self.getMatchIds()
         if self.currentMatchIndex >= len(matchIds) - 1:
             raise StopIteration
         else:
             self.currentMatchIndex += 1
             return self._matches[matchIds[self.currentMatchIndex]]
-
 
 
 class MatchListLite(MatchList):
@@ -101,6 +108,19 @@ class MatchListLite(MatchList):
             [] - empty list
         """
         return []
+
+    def next(self):
+        """
+        Iterator implementation for MatchList
+        RETURNS:
+            int - returns next match id in list
+        """
+        matchIds = self.getMatchIds()
+        if self.currentMatchIndex >= len(matchIds) - 1:
+            raise StopIteration
+        else:
+            self.currentMatchIndex += 1
+            return matchIds[self.currentMatchIndex]
 
 
 class Match():
@@ -161,15 +181,32 @@ class Match():
         """
         return self.matchStats.keys()
 
+    def getHomeAwayValue(self, team):
+        """
+        Return homeValue or awayValue depending on whether the
+        team is home or away
+        ARGS:
+            team (str) - team name
+        RETURNS:
+            str - homeValue/awayValue for the team or None if team is not in the match
+        """
+        if team.lower() == self.homeTeam['name'].lower():
+            return 'homeValue'
+        elif team.lower() == self.awayTeam['name'].lower():
+            return 'awayValue'
+        else:
+            return None
+
     def getStatForTeam(self, team, stat):
         """
         Return a stats value for a given team if they played in the match
+        ARGS:
+            team (str) - team name
+            stat (str) - stat name to get
+        RETURNS:
+            float - value for stat or None if not found
         """
-        if team.lower() == self.homeTeam['name'].lower():
-            value = 'homeValue'
-        elif team.lower() == self.awayTeam['name'].lower():
-            value = 'awayValue'
-        else:
-            return None
-        
-        return self.matchStats[stat][value]
+        if stat in self.matchStats.keys():
+            value = self.getHomeAwayValue(team)
+            return self.matchStats[stat][value] if value is not None else None
+        return None
