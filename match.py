@@ -3,9 +3,9 @@ from rugbydb import RugbyDB, CachedDB
 class MatchList():
 
     @classmethod
-    def createMatchListForTeam(cls, teamName):
+    def createMatchListForTeam(cls, teamName, leagues=None, seasons=None):
         db = CachedDB()
-        matchIds = db.getMatchesForTeam(teamName.lower())
+        matchIds = db.getMatchesForTeam(teamName.lower(), leagues=leagues, seasons=seasons)
         return cls(matchIds)
 
     @classmethod
@@ -22,6 +22,9 @@ class MatchList():
     def __str__(self):
         return "{}".format(self._matches.keys())
 
+    def __len__(self):
+        return len(self._matches.keys())
+
     def getMatchIds(self):
         return sorted(self._matches.keys())
 
@@ -36,13 +39,11 @@ class MatchList():
 class MatchListLite(MatchList):
 
     def __init__(self, matchIds):
-        self._matches = matchIds
-
-    def getMatchIds(self):
-        return sorted(self._matches)
+        self._matches = {el: None for el in matchIds}
 
     def getAllTeams(self):
         return []
+
 
 class Match():
 
@@ -77,3 +78,6 @@ class Match():
     
     def __str__(self):
         return "{} v {} - {}".format(self.homeTeam['name'], self.awayTeam['name'], self.date)
+
+    def getAllStatHeaders(self):
+        return self.matchStats.keys()
