@@ -67,6 +67,19 @@ class MatchList():
                 self._teams.append(match.homeTeam)
         return self._teams
 
+    def __iter__(self):
+        self.currentMatchIndex = -1
+        return self
+
+    def next(self):
+        matchIds = self.getMatchIds()
+        if self.currentMatchIndex >= len(matchIds) - 1:
+            raise StopIteration
+        else:
+            self.currentMatchIndex += 1
+            return self._matches[matchIds[self.currentMatchIndex]]
+
+
 
 class MatchListLite(MatchList):
     """
@@ -117,11 +130,17 @@ class Match():
 
         self.homeTeam = {'name': homeTeam['name'], 'abbrev': homeTeam['abbrev'], 'score': homeTeam['score']}
         self.awayTeam = {'name': awayTeam['name'], 'abbrev': awayTeam['abbrev'], 'score': awayTeam['score']}
-        self.matchStats = {'Points': {'homeValue': homeTeam['score'], 'awayValue': awayTeam['score']}}
+        self.matchStats = {'Points': {'homeValue': float(homeTeam['score']), 'awayValue': float(awayTeam['score'])}}
 
         for item in dataVis + table + disicpline + scores + attacking:
-            self.matchStats[item['text']] = {'homeValue': item['homeValue'], 'awayValue': item['awayValue']}
-        self.matchStats['Penalties Conceded'] = {'homeValue': penalties['homeTotal'], 'awayValue': penalties['awayTotal']}
+            try:
+                homeValue = float(item['homeValue'])
+                awayValue = float(item['awayValue'])
+            except:
+                homeValue = float(item['homeValue'][:-1])
+                awayValue = float(item['awayValue'][:-1])
+            self.matchStats[item['text']] = {'homeValue': homeValue, 'awayValue': awayValue}
+        self.matchStats['Penalties Conceded'] = {'homeValue': float(penalties['homeTotal']), 'awayValue': float(penalties['awayTotal'])}
         self.players = {'home': [], 'away': []}
         for team in self.players.keys():
             pass
@@ -141,3 +160,16 @@ class Match():
             [str] - list of stat headers for the match
         """
         return self.matchStats.keys()
+
+    def getStatForTeam(self, team, stat):
+        """
+        Return a stats value for a given team if they played in the match
+        """
+        if team.lower() == self.homeTeam['name'].lower():
+            value = 'homeValue'
+        elif team.lower() == self.awayTeam['name'].lower():
+            value = 'awayValue'
+        else:
+            return None
+        
+        return self.matchStats[stat][value]

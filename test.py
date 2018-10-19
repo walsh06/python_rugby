@@ -1,7 +1,7 @@
 import time
 
 from league import League
-from match import MatchList
+from match import MatchList, Match
 from rugbydb import RugbyDB
 
 class Timer():
@@ -49,6 +49,12 @@ def testMatchList():
     matchList = MatchList.createMatchListForTeam('munster')
     print matchList.getMatchIds()
 
+def testMatch():
+    db = RugbyDB()
+    m = Match.fromMatchDict(db.getMatchById('133782'))
+    print m.getAllStatHeaders()
+    checkResult("Match - get stat for team", m.getStatForTeam, ['Ireland', 'Points'], 30)
+
 def testDB():
     with Timer('Database Load') as t:
         db = RugbyDB()
@@ -56,7 +62,8 @@ def testDB():
         matches = db.getMatchesForTeam('munster')
 
 if __name__ == "__main__":
-    testLeague()
-    testDB()
+    # testLeague()
+    # testDB()
     testMatchList()
+    testMatch()
 
