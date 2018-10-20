@@ -39,8 +39,8 @@ def checkResult(testName, func, args, expectedResult):
 def testLeague():
     l = League(1234, 'leagueOne', {'1819': [1,2,3,4], '1718': [5,6,7,8]}, False)
 
-    checkResult("All Match ids", l.getMatchIds, [], [5,6,7,8,1,2,3,4])
-    checkResult("1819 Match ids", l.getMatchIds, ['1819'], [1,2,3,4])
+    checkResult("League - All Match ids", l.getMatchIds, [], [5,6,7,8,1,2,3,4])
+    checkResult("League - Season Match ids", l.getMatchIds, ['1819'], [1,2,3,4])
 
     with Timer('League Load') as t:
         l = League('180659', 'Six Nations', initMatches=True)
@@ -77,8 +77,8 @@ def testDB():
         matches = db.getMatchesForTeam('munster')
 
 if __name__ == "__main__":
+    testDB()    
     testLeague()
-    testDB()
     testMatchList()
     testMatch()
     testPlayer()

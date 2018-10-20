@@ -112,7 +112,21 @@ class PlayerList():
         self.players = []
         for playerDict in playerDictList:
             self.players.append(Player(playerDict))
+    
+    def __len__(self):
+        """
+        Len representation of PlayerList
+        """
+        return len(self.players)
 
+    def __add__(aPlayerList, bPlayerList):
+        """
+        Override add operator to add two PlayerLists together
+        """
+        for bPlayer in bPlayerList:
+            aPlayerList.addPlayer(bPlayer)
+        return aPlayerList
+    
     def __iter__(self):
         """
         Iterator implementation for MatchList
@@ -142,3 +156,12 @@ class PlayerList():
             return self.players[index]
         else:
             return None
+
+    def addPlayer(self, player):
+        """
+        Add a player to the list
+        ARGS:
+            player (Player) - add a player object to the list
+        """
+        self.players.append(player)
+
