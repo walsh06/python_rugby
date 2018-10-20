@@ -1,4 +1,5 @@
 import time
+import datetime
 
 from league import League
 from match import MatchList, Match
@@ -48,7 +49,11 @@ def testLeague():
 def testMatchList():
     with Timer('Create Match List for Team'):
         matchList = MatchList.createMatchListForTeam('munster')
-    #print matchList.getMatchIds()
+    
+    startDate = datetime.datetime(2018, 10, 12)
+    endDate = datetime.datetime(2018, 10, 15)
+    filteredMatchList = matchList.getMatchesinDateRange(startDate, endDate)
+    checkResult('MatchList - Test date range', len, [filteredMatchList], 1)
 
 def testMatch():
     db = RugbyDB()

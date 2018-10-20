@@ -88,6 +88,35 @@ class MatchList():
         else:
             self.currentMatchIndex += 1
             return self._matches[matchIds[self.currentMatchIndex]]
+    
+    def addMatch(self, id, match):
+        """
+        Add a new match to the matchlist
+        ARGS:
+            id (int) - match id of the new match
+            match (Match) - match to add
+        """
+        self._matches[id] = match
+
+    def getMatchesinDateRange(self, startDate=None, endDate=None):
+        """
+        Filter MatchList for a given date range, returns a new MatchList
+        ARGS:
+            startDate (datetime) - start date in range to search, default to datetime.min
+            endDate (datetime) - end date in range to search, default to datetime.max
+        RETURNS:
+            MatchList (obj) - return new MatchList object with matches in date range
+        """
+        matches = MatchList(matchIds=[])
+        if startDate is None:
+            startDate = datetime.min
+        if endDate is None:
+            endDate = datetime.max
+        for id in self._matches.keys():
+            match = self._matches[id]
+            if match.date > startDate and match.date < endDate:
+                matches.addMatch(id, match)
+        return matches
 
 
 class MatchListLite(MatchList):
@@ -123,6 +152,17 @@ class MatchListLite(MatchList):
         else:
             self.currentMatchIndex += 1
             return matchIds[self.currentMatchIndex]
+
+    def getMatchesinDateRange(self, startDate=None, endDate=None):
+        """
+        Not implemented for MatchListLite
+        ARGS:
+            startDate (datetime) - start date in range to search
+            endDate (datetime) - end date in range to search
+        RETURNS:
+            None - not implemented
+        """
+        return None
 
 
 class Match():
