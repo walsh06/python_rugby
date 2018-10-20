@@ -124,7 +124,7 @@ class League():
             teams.extend(self._matches[season].getAllTeams())
         return team in teams
 
-    def getMatchesinDateRange(self, startDate=None, endDate=None):
+    def getMatchesInDateRange(self, startDate=None, endDate=None):
         """
         Filter matches in the league for a given date range, returns a new MatchList
         ARGS:
@@ -139,5 +139,5 @@ class League():
             endDate = datetime.max
         mergedMatchList = MatchList(matchIds=[])
         for season in self._getSeasonList(None):
-            mergedMatchList += self._matches[season].getMatchesinDateRange(startDate, endDate)
+            mergedMatchList += self._matches[season].getMatchesInDateRange(startDate, endDate)
         return mergedMatchList
