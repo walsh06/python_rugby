@@ -36,7 +36,9 @@ class MatchList():
         self._teams = None
         db = CachedDB()
         for id in matchIds:
-            self._matches[id] = Match.fromMatchId(id)
+            newMatch = Match.fromMatchId(id)
+            if newMatch is not None:
+                self._matches[id] = newMatch
     
     def __str__(self):
         """
@@ -107,7 +109,7 @@ class MatchList():
         """
         self._matches[id] = match
 
-    def getMatchesinDateRange(self, startDate=None, endDate=None):
+    def getMatchesInDateRange(self, startDate=None, endDate=None):
         """
         Filter MatchList for a given date range, returns a new MatchList
         ARGS:
@@ -162,7 +164,7 @@ class MatchListLite(MatchList):
             self.currentMatchIndex += 1
             return matchIds[self.currentMatchIndex]
 
-    def getMatchesinDateRange(self, startDate=None, endDate=None):
+    def getMatchesInDateRange(self, startDate=None, endDate=None):
         """
         Not implemented for MatchListLite
         ARGS:
@@ -185,8 +187,10 @@ class Match():
         RETURNS
             Match (obj) - Match object
         """
-        db = CachedDB()
-        return cls(db.getMatchById(matchId))
+        matchDict = CachedDB().getMatchById(matchId)
+        if matchDict is None:
+            return None
+        return cls(matchDict)
 
     def __init__(self, matchDict):
         """
@@ -213,7 +217,7 @@ class Match():
                              int(timeParts[1]))
         self.homeTeam = {'name': homeTeam['name'], 'abbrev': homeTeam['abbrev'], 'score': homeTeam['score']}
         self.awayTeam = {'name': awayTeam['name'], 'abbrev': awayTeam['abbrev'], 'score': awayTeam['score']}
-        self.matchStats = {'Points': {'homeValue': float(homeTeam['score']), 'awayValue': float(awayTeam['score'])}}
+        self.matchStats = {'points': {'homeValue': float(homeTeam['score']), 'awayValue': float(awayTeam['score'])}}
 
         for item in dataVis + table + discipline + scores + attacking:
             try:
@@ -222,8 +226,8 @@ class Match():
             except:
                 homeValue = float(item['homeValue'][:-1])
                 awayValue = float(item['awayValue'][:-1])
-            self.matchStats[item['text']] = {'homeValue': homeValue, 'awayValue': awayValue}
-        self.matchStats['Penalties Conceded'] = {'homeValue': float(penalties['homeTotal']), 'awayValue': float(penalties['awayTotal'])}
+            self.matchStats[item['text'].lower()] = {'homeValue': homeValue, 'awayValue': awayValue}
+        self.matchStats['penalties conceded'] = {'homeValue': float(penalties['homeTotal']), 'awayValue': float(penalties['awayTotal'])}
         self.players = {}
         self.players[self.homeTeam['name']] = PlayerList(players['home']['team'] + players['home']['reserves'])
         self.players[self.awayTeam['name']] = PlayerList(players['away']['team'] + players['away']['reserves'])
@@ -267,7 +271,7 @@ class Match():
         RETURNS:
             float - value for stat or None if not found
         """
-        if stat in self.matchStats.keys():
+        if stat.lower() in self.matchStats.keys():
             value = self.getHomeAwayValue(team)
-            return self.matchStats[stat][value] if value is not None else None
+            return self.matchStats[stat.lower()][value] if value is not None else None
         return None

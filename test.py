@@ -46,7 +46,7 @@ def testLeague():
         l = League('180659', 'Six Nations', initMatches=True)
     startDate = datetime.datetime(2018, 3, 16)
     endDate = datetime.datetime(2018, 3, 18)
-    filteredLeagueMatches  = l.getMatchesinDateRange(startDate, endDate)
+    filteredLeagueMatches  = l.getMatchesInDateRange(startDate, endDate)
     checkResult('League - Test date range', len, [filteredLeagueMatches], 3)
 
 def testMatchList():
@@ -55,7 +55,7 @@ def testMatchList():
     
     startDate = datetime.datetime(2018, 10, 12)
     endDate = datetime.datetime(2018, 10, 15)
-    filteredMatchList = matchList.getMatchesinDateRange(startDate, endDate)
+    filteredMatchList = matchList.getMatchesInDateRange(startDate, endDate)
     checkResult('MatchList - Test date range', len, [filteredMatchList], 1)
 
 def testMatch():

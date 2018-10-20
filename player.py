@@ -20,7 +20,7 @@ class Player():
         for key in playerDict.keys():
             if type(playerDict[key]) is dict and key != 'eventTimes':
                 stat = playerDict[key]
-                self.matchStats[stat['name']] = float(stat['value'])
+                self.matchStats[stat['name'].lower()] = float(stat['value'])
 
     def __str__(self):
         return "{}: {}".format(self.number, self.name)
@@ -33,8 +33,8 @@ class Player():
         RETURNS
             float - stat value, None if stat not found
         """
-        if stat in self.matchStats.keys():
-            return self.matchStats[stat]
+        if stat.lower() in self.matchStats.keys():
+            return self.matchStats[stat.lower()]
         return None
 
     def getStatAverage(self, stat):
