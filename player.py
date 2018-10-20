@@ -21,6 +21,10 @@ class Player():
             if type(playerDict[key]) is dict and key != 'eventTimes':
                 stat = playerDict[key]
                 self.matchStats[stat['name'].lower()] = float(stat['value'])
+        
+        if 'missed tackles' in self.matchStats.keys():
+            # adjust tackles to be completed tackles
+            self.matchStats['tackles'] = self.matchStats['tackles'] - self.matchStats['missed tackles']
 
     def __str__(self):
         return "{}: {}".format(self.number, self.name)

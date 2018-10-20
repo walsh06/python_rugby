@@ -1,3 +1,5 @@
+import re
+
 from rugbydb import RugbyDB, CachedDB
 from datetime import datetime
 
@@ -206,6 +208,8 @@ class Match():
         attacking = matchDict['gamePackage']['matchEvents']['col'][1][1]['data']
         discipline = matchDict['gamePackage']['matchDiscipline']['col'][1][0]['data']
         penalties = matchDict['gamePackage']['matchDiscipline']['col'][0][0]['data']
+        matchAttacking = matchDict['gamePackage']['matchAttacking']['col'][1][0]['data']
+        matchDefending = matchDict['gamePackage']['matchDefending']['col'][0]
         players = matchDict['gamePackage']['matchLineUp']
         
         dateParts = date[:10].split('-')
@@ -228,6 +232,35 @@ class Match():
                 awayValue = float(item['awayValue'][:-1])
             self.matchStats[item['text'].lower()] = {'homeValue': homeValue, 'awayValue': awayValue}
         self.matchStats['penalties conceded'] = {'homeValue': float(penalties['homeTotal']), 'awayValue': float(penalties['awayTotal'])}
+        
+        # adjust tackles to remove missed tackles from the total
+        for value in ('homeValue', 'awayValue'):
+            self.matchStats['tackles'][value] = self.matchStats['tackles'][value] - self.matchStats['missed tackles'][value]
+        
+        for stat in matchAttacking:
+            if "/" in stat['homeValue']:
+                if "Won" in stat['text']:
+                    statName = stat['text'].split(' ')[0].lower()
+                    homeStat = stat['homeValue'].split(' ')
+                    awayStat = stat['awayValue'].split(' ') 
+                    self.matchStats["{} won".format(statName)] = {'homeValue': homeStat[0], 'awayValue': awayStat[0]}
+                    self.matchStats["{} total".format(statName)] = {'homeValue': homeStat[2], 'awayValue': awayStat[2]}
+                else:
+                    statName = stat['text'].split(' ')[0].lower()
+                    statSubText = stat['text'].split(' ')[1].split('/')
+
+                    homeStat = stat['homeValue'].split(' / ')
+                    awayStat = stat['awayValue'].split(' / ') 
+                    self.matchStats["{} {}".format(statName, statSubText[0].lower())] = {'homeValue': homeStat[0][:-1], 'awayValue': awayStat[0][:-1]}
+                    self.matchStats["{} {}".format(statName, statSubText[1].lower())] = {'homeValue': homeStat[1][:-1], 'awayValue': awayStat[1][:-1]} 
+            else:
+                self.matchStats[item['text'].lower()] = {'homeValue': homeValue, 'awayValue': awayValue}
+        
+        for stat in matchDefending:
+            setPiece = stat['data']
+            statName = setPiece['text'].split(' ')[0].lower()
+            self.matchStats["{} won".format(statName)] = {'homeValue': setPiece['homeWon'], 'awayValue': setPiece['awayWon']}
+            self.matchStats["{} total".format(statName)] = {'homeValue': setPiece['homeTotal'], 'awayValue': setPiece['awayTotal']}
         self.players = {}
         self.players[self.homeTeam['name']] = PlayerList(players['home']['team'] + players['home']['reserves'])
         self.players[self.awayTeam['name']] = PlayerList(players['away']['team'] + players['away']['reserves'])
@@ -244,7 +277,7 @@ class Match():
         RETURNS:
             [str] - list of stat headers for the match
         """
-        return self.matchStats.keys()
+        return sorted(self.matchStats.keys())
 
     def getHomeAwayValue(self, team):
         """
