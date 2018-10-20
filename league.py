@@ -1,5 +1,6 @@
-from match import MatchList, MatchListLite
+from datetime import datetime
 
+from match import MatchList, MatchListLite
 from variables import MATCH_IDS
 
 class LeagueList():
@@ -104,9 +105,8 @@ class League():
         RETURNS
             [str] - list of match ids
         """
-        seasons = self._getSeasonList(season)
         matchIdList = []
-        for season in seasons:
+        for season in self._getSeasonList(season):
             matchIdList.extend(self._matches[season].getMatchIds())
         return matchIdList
 
@@ -119,8 +119,27 @@ class League():
         RETURNS:
             bool - True if team is in the league, False if team is not in the league
         """
-        seasons = self._getSeasonList(season)
         teams = []
-        for season in seasons:
+        for season in self._getSeasonList(season):
             teams.extend(self._matches[season].getAllTeams())
         return team in teams
+
+    def getMatchesinDateRange(self, startDate=None, endDate=None):
+        """
+        Filter matches in the league for a given date range, returns a new MatchList
+        ARGS:
+            startDate (datetime) - start date in range to search, default to datetime.min
+            endDate (datetime) - end date in range to search, default to datetime.max
+        RETURNS:
+            MatchList (obj) - return new MatchList object with matches in date range
+        """
+        if startDate is None:
+            startDate = datetime.min
+        if endDate is None:
+            endDate = datetime.max
+        mergedMatchList = MatchList(matchIds=[])
+        for season in self._getSeasonList(None):
+            mergedMatchList += self._matches[season].getMatchesinDateRange(startDate, endDate)
+        return mergedMatchList
+            
+
