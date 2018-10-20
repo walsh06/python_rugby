@@ -52,7 +52,7 @@ def testMatchList():
 
 def testMatch():
     db = RugbyDB()
-    m = Match.fromMatchDict(db.getMatchById('133782'))
+    m = Match.fromMatchId('133782')
     checkResult("Match - get stat for team", m.getStatForTeam, ['Ireland', 'Points'], 30)
     checkResult("Match - get wrong stat for team", m.getStatForTeam, ['Ireland', 'FakeStat'], None)
     checkResult("Match - get stat for wrong team", m.getStatForTeam, ['FakeTeam', 'FakeStat'], None)

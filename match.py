@@ -33,7 +33,7 @@ class MatchList():
         self._teams = None
         db = CachedDB()
         for id in matchIds:
-            self._matches[id] = Match.fromMatchDict(db.getMatchById(id))
+            self._matches[id] = Match.fromMatchId(id)
     
     def __str__(self):
         """
@@ -126,33 +126,39 @@ class MatchListLite(MatchList):
 class Match():
 
     @classmethod
-    def fromMatchDict(cls, matchDict):
+    def fromMatchId(cls, matchId):
         """
-        Create a Match object from match dict loaded from the database
+        Create a Match object from match id
         ARGS:
-            matchDict (dict) - full dictionary of a match loaded from the database
+            matchId (int) - id for a match to create object for
         RETURNS
             Match (obj) - Match object
         """
-        return cls(matchDict['gamePackage']['gameStrip']['teams']['home'], 
-                  matchDict['gamePackage']['gameStrip']['teams']['away'],
-                  matchDict['gamePackage']['gameStrip']['isoDate'],
-                  matchDict['gamePackage']['matchStats']['dataVis'],
-                  matchDict['gamePackage']['matchStats']['table'],
-                  matchDict['gamePackage']['matchEvents']['col'][0][0]['data'],
-                  matchDict['gamePackage']['matchEvents']['col'][1][1]['data'],
-                  matchDict['gamePackage']['matchDiscipline']['col'][1][0]['data'],
-                  matchDict['gamePackage']['matchDiscipline']['col'][0][0]['data'],
-                  matchDict['gamePackage']['matchLineUp'])
+        db = CachedDB()
+        return cls(db.getMatchById(matchId))
 
-    def __init__(self, homeTeam, awayTeam, date, dataVis, table, scores, attacking, disicpline, penalties, players):
+    def __init__(self, matchDict):
+        """
+        ARGS:
+            matchDict (dict) - dictionary storing match information from database
+        """
+        homeTeam = matchDict['gamePackage']['gameStrip']['teams']['home'] 
+        awayTeam = matchDict['gamePackage']['gameStrip']['teams']['away']
+        date = matchDict['gamePackage']['gameStrip']['isoDate']
+        dataVis = matchDict['gamePackage']['matchStats']['dataVis']
+        table = matchDict['gamePackage']['matchStats']['table']
+        scores = matchDict['gamePackage']['matchEvents']['col'][0][0]['data']
+        attacking = matchDict['gamePackage']['matchEvents']['col'][1][1]['data']
+        discipline = matchDict['gamePackage']['matchDiscipline']['col'][1][0]['data']
+        penalties = matchDict['gamePackage']['matchDiscipline']['col'][0][0]['data']
+        players = matchDict['gamePackage']['matchLineUp']
+
         self.date = "{} {}".format(date[:10], date[11:-1])
-
         self.homeTeam = {'name': homeTeam['name'], 'abbrev': homeTeam['abbrev'], 'score': homeTeam['score']}
         self.awayTeam = {'name': awayTeam['name'], 'abbrev': awayTeam['abbrev'], 'score': awayTeam['score']}
         self.matchStats = {'Points': {'homeValue': float(homeTeam['score']), 'awayValue': float(awayTeam['score'])}}
 
-        for item in dataVis + table + disicpline + scores + attacking:
+        for item in dataVis + table + discipline + scores + attacking:
             try:
                 homeValue = float(item['homeValue'])
                 awayValue = float(item['awayValue'])
