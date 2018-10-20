@@ -1,6 +1,7 @@
 from rugbydb import RugbyDB, CachedDB
 from datetime import datetime
 
+from player import PlayerList
 
 class MatchList():
     """
@@ -202,7 +203,7 @@ class Match():
         discipline = matchDict['gamePackage']['matchDiscipline']['col'][1][0]['data']
         penalties = matchDict['gamePackage']['matchDiscipline']['col'][0][0]['data']
         players = matchDict['gamePackage']['matchLineUp']
-
+        
         dateParts = date[:10].split('-')
         timeParts = date[11:-1].split(':')
         self.date = datetime(int(dateParts[0]),
@@ -223,11 +224,9 @@ class Match():
                 awayValue = float(item['awayValue'][:-1])
             self.matchStats[item['text']] = {'homeValue': homeValue, 'awayValue': awayValue}
         self.matchStats['Penalties Conceded'] = {'homeValue': float(penalties['homeTotal']), 'awayValue': float(penalties['awayTotal'])}
-        self.players = {'home': [], 'away': []}
-        for team in self.players.keys():
-            pass
-            # for player in players[team]['team']:
-            #     self.players[team].append(Player.fromPlayerDict(player))
+        self.players = {}
+        self.players[self.homeTeam['name']] = PlayerList(players['home']['team'] + players['home']['reserves'])
+        self.players[self.awayTeam['name']] = PlayerList(players['away']['team'] + players['away']['reserves'])
     
     def __str__(self):
         """

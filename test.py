@@ -39,8 +39,8 @@ def checkResult(testName, func, args, expectedResult):
 def testLeague():
     l = League(1234, 'leagueOne', {'1819': [1,2,3,4], '1718': [5,6,7,8]}, False)
 
-    checkResult("All Match ids", l.getMatchIds, [], [5,6,7,8,1,2,3,4])
-    checkResult("1819 Match ids", l.getMatchIds, ['1819'], [1,2,3,4])
+    checkResult("League - All Match ids", l.getMatchIds, [], [5,6,7,8,1,2,3,4])
+    checkResult("League - Season Match ids", l.getMatchIds, ['1819'], [1,2,3,4])
 
     with Timer('League Load') as t:
         l = League('180659', 'Six Nations', initMatches=True)
@@ -59,11 +59,16 @@ def testMatchList():
     checkResult('MatchList - Test date range', len, [filteredMatchList], 1)
 
 def testMatch():
-    db = RugbyDB()
     m = Match.fromMatchId('133782')
     checkResult("Match - get stat for team", m.getStatForTeam, ['Ireland', 'Points'], 30)
     checkResult("Match - get wrong stat for team", m.getStatForTeam, ['Ireland', 'FakeStat'], None)
     checkResult("Match - get stat for wrong team", m.getStatForTeam, ['FakeTeam', 'FakeStat'], None)
+
+def testPlayer():
+    m = Match.fromMatchId('133782')
+    player = m.players[m.homeTeam['name']].getPlayer(0)
+    checkResult("Player  - get stat for player", player.getStat, ['Tries'], 1)
+    checkResult("Player  - get wrong stat for player", player.getStat, ['FakeStat'], None)
 
 def testDB():
     with Timer('Database Load') as t:
@@ -72,8 +77,9 @@ def testDB():
         matches = db.getMatchesForTeam('munster')
 
 if __name__ == "__main__":
+    testDB()    
     testLeague()
-    testDB()
     testMatchList()
     testMatch()
+    testPlayer()
 
