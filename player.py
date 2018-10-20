@@ -20,7 +20,10 @@ class Player():
         for key in playerDict.keys():
             if type(playerDict[key]) is dict and key != 'eventTimes':
                 stat = playerDict[key]
-                    self.matchStats[stat['name']] = float(stat['value'])
+                self.matchStats[stat['name']] = float(stat['value'])
+
+    def __str__(self):
+        return "{}: {}".format(self.number, self.name)
 
     def getStat(self, stat):
         """
@@ -34,6 +37,15 @@ class Player():
             return self.matchStats[stat]
         return None
 
+    def getStatAverage(self, stat):
+        """
+        Get the average value of a given stat for the player
+        ARGS:
+            stat (str) - name of the stat to look for
+        RETURNS
+            float - stat value, None if stat not found
+        """
+        return self.getStat(stat)
 
 class PlayerSeries():
     """
@@ -58,7 +70,37 @@ class PlayerSeries():
         for playerDict in playerDictList:
             self.playerMatches.append(PlayerMatch(playerDict))
 
-            
+    def __str__(self):
+        return self.name
+
+    def getStat(self, stat):
+        """
+        Get the total value of a given stat for the player in all matches
+        ARGS:
+            stat (str) - name of the stat to look for
+        RETURNS
+            float - stat value, None if stat not found
+        """
+        statTotal = 0
+        for match in playerMatches:
+            statValue = match.getStat(stat)
+            if statValue is None:
+                return None
+            else:
+                statTotal += statValue
+        return statTotal
+    
+    def getStatAverage(self, stat):
+        """
+        Get the average value of a given stat for the player
+        ARGS:
+            stat (str) - name of the stat to look for
+        RETURNS
+            float - stat value, None if stat not found
+        """
+        statTotal = self.getStat(stat)
+        return statTotal/len(playerMatches) if statTotal is not None else None
+
 
 class PlayerList():
 

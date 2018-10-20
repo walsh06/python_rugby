@@ -59,11 +59,16 @@ def testMatchList():
     checkResult('MatchList - Test date range', len, [filteredMatchList], 1)
 
 def testMatch():
-    db = RugbyDB()
     m = Match.fromMatchId('133782')
     checkResult("Match - get stat for team", m.getStatForTeam, ['Ireland', 'Points'], 30)
     checkResult("Match - get wrong stat for team", m.getStatForTeam, ['Ireland', 'FakeStat'], None)
     checkResult("Match - get stat for wrong team", m.getStatForTeam, ['FakeTeam', 'FakeStat'], None)
+
+def testPlayer():
+    m = Match.fromMatchId('133782')
+    player = m.players['home'][0]
+    checkResult("Player  - get stat for player", player.getStat, ['Tries'], 1)
+    checkResult("Player  - get wrong stat for player", player.getStat, ['FakeStat'], None)
 
 def testDB():
     with Timer('Database Load') as t:
@@ -76,4 +81,5 @@ if __name__ == "__main__":
     testDB()
     testMatchList()
     testMatch()
+    testPlayer()
 
