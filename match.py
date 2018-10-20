@@ -49,6 +49,14 @@ class MatchList():
         """
         return len(self._matches.keys())
 
+    def __add__(aMatchList, bMatchList):
+        """
+        Override add operator to add two matchlists together
+        """
+        for id in bMatchList._matches.keys():
+            aMatchList.addMatch(id, bMatchList._matches[id])
+        return aMatchList
+
     def getMatchIds(self):
         """
         Return all match ids in the MatchList

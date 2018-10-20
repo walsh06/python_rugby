@@ -44,7 +44,10 @@ def testLeague():
 
     with Timer('League Load') as t:
         l = League('180659', 'Six Nations', initMatches=True)
-    print l.getMatchIds('2017')
+    startDate = datetime.datetime(2018, 3, 16)
+    endDate = datetime.datetime(2018, 3, 18)
+    filteredLeagueMatches  = l.getMatchesinDateRange(startDate, endDate)
+    checkResult('League - Test date range', len, [filteredLeagueMatches], 3)
 
 def testMatchList():
     with Timer('Create Match List for Team'):
