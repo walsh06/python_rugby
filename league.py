@@ -141,5 +141,3 @@ class League():
         for season in self._getSeasonList(None):
             mergedMatchList += self._matches[season].getMatchesinDateRange(startDate, endDate)
         return mergedMatchList
-            
-

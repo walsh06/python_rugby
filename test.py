@@ -66,7 +66,7 @@ def testMatch():
 
 def testPlayer():
     m = Match.fromMatchId('133782')
-    player = m.players['home'][0]
+    player = m.players[m.homeTeam['name']].getPlayer(0)
     checkResult("Player  - get stat for player", player.getStat, ['Tries'], 1)
     checkResult("Player  - get wrong stat for player", player.getStat, ['FakeStat'], None)
 

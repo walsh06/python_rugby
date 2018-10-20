@@ -104,5 +104,41 @@ class PlayerSeries():
 
 class PlayerList():
 
-    def __init__(self):
-        pass
+    def __init__(self, playerDictList):
+        """
+        ARGS:
+            playerDictList ([dict]) - List of player dicts from the database
+        """
+        self.players = []
+        for playerDict in playerDictList:
+            self.players.append(Player(playerDict))
+
+    def __iter__(self):
+        """
+        Iterator implementation for MatchList
+        """
+        self.currentIndex = -1
+        return self
+
+    def next(self):
+        """
+        Iterator implementation for PlayerList
+        RETURNS:
+            Player (obj) - returns next player object in list
+        """
+        if self.currentIndex >= len(self.players) - 1:
+            raise StopIteration
+        else:
+            self.currentIndex += 1
+            return self.players[self.currentIndex]
+
+    def getPlayer(self, index):
+        """
+        Return player at index in player list
+        ARGS:
+            index (int) - index in list, None if index is not in list
+        """
+        if index > -1 and index < len(self.players):
+            return self.players[index]
+        else:
+            return None
