@@ -49,6 +49,9 @@ def testLeague():
     filteredLeagueMatches  = l.getMatchesInDateRange(startDate, endDate)
     checkResult('League - Test date range', len, [filteredLeagueMatches], 3)
 
+    l = League.fromLeagueName('Six Nations', initMatches=False)
+    checkResult('League - Test fromLeagueName', cmp, [l.id, '180659'], 0)
+
 def testMatchList():
     with Timer('Create Match List for Team'):
         matchList = MatchList.createMatchListForTeam('munster')

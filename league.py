@@ -53,7 +53,20 @@ class League():
     instead to avoid loading up all matches from the database
     """
 
-    def __init__(self, id, name, matchIdDict=None, initMatches=False):
+    @classmethod
+    def fromLeagueName(cls, name, initMatches=True):
+        """
+        Create a League with the league name, returns None if league name not found
+        ARGS:
+            name (str) - name of the league
+            initMatches (bool) - True = Load all match data into MatchList, False = Only store match ids in MatchList
+        """
+        for league in MATCH_IDS.keys():
+            if MATCH_IDS[league]['name'].lower() == name.lower():
+                return cls(league, name, initMatches=initMatches)
+        return None
+
+    def __init__(self, id, name, matchIdDict=None, initMatches=True):
         """
         ARGS:
             id (str) - id of the league
