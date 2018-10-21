@@ -7,21 +7,24 @@ MATCH_IDS = {'180659': {'name': 'six nations',
                         '2013': range(133782, 133797)}
                      },
             '270557': {'name': 'pro14', 
-                       'matchIds': {'1718': [x for x in range(291359,291366)]+[x for x in range(291872,          292005)],
+                       'matchIds': {'1718': [x for x in range(291359,291366)]+[x for x in range(291872,          292017)],
                                     '1819': range(293236, 293279)}
                        },
             '271937': {'name': 'champions cup',
                        'matchIds': {'1718': range(291705, 291764),
-                                    '1819': range(293564, 293574)}},
+                                    '1819': range(293564, 293584)}},
             '242041': {'name': 'super rugby',
-                       'matchIds': {'2018': range(292098, 292165),
+                       'matchIds': {'2018': range(292098, 292225),
                                     '2017': range(290856, 290924)}},#range(290769, 290924)}},290856
             '244293': {'name': 'the rugby championship',
                        'matchIds': {'2017': range(291158, 291170)}},
             '267979': {'name': 'aviva premiership',
-                       'matchIds': {'1718': range(291554, 291668),
+                       'matchIds': {'1718': range(291554, 291689),
                                     '1819': range(293392, 293429)}},
             '270559': {'name': 'top 14',
-                       'matchIds': {'1718': range(291366, 291516),
+                       'matchIds': {'1718': range(291366, 292098),
                                     '1819': range(293042, 293091)}},
-            }
+            '272073' : {'name': 'challenge cup',
+                        'matchIds': {'1819': range(293631, 293651),
+                                     '1718': range(291764, 292812)}}
+}
