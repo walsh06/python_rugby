@@ -212,58 +212,63 @@ class Match():
         matchDefending = matchDict['gamePackage']['matchDefending']['col'][0]
         players = matchDict['gamePackage']['matchLineUp']
         
-        dateParts = date[:10].split('-')
-        timeParts = date[11:-1].split(':')
-        self.date = datetime(int(dateParts[0]),
-                             int(dateParts[1]),
-                             int(dateParts[2]),
-                             int(timeParts[0]),
-                             int(timeParts[1]))
-        self.homeTeam = {'name': homeTeam['name'], 'abbrev': homeTeam['abbrev'], 'score': homeTeam['score']}
-        self.awayTeam = {'name': awayTeam['name'], 'abbrev': awayTeam['abbrev'], 'score': awayTeam['score']}
-        self.matchStats = {'points': {'homeValue': float(homeTeam['score']), 'awayValue': float(awayTeam['score'])}}
-
-        for item in dataVis + table + discipline + scores + attacking:
-            try:
-                homeValue = float(item['homeValue'])
-                awayValue = float(item['awayValue'])
-            except:
-                homeValue = float(item['homeValue'][:-1])
-                awayValue = float(item['awayValue'][:-1])
-            self.matchStats[item['text'].lower()] = {'homeValue': homeValue, 'awayValue': awayValue}
-        self.matchStats['penalties conceded'] = {'homeValue': float(penalties['homeTotal']), 'awayValue': float(penalties['awayTotal'])}
-        
-        # adjust tackles to remove missed tackles from the total
-        for value in ('homeValue', 'awayValue'):
-            self.matchStats['tackles'][value] = self.matchStats['tackles'][value] - self.matchStats['missed tackles'][value]
-        
-        for stat in matchAttacking:
-            if "/" in stat['homeValue']:
-                if "Won" in stat['text']:
-                    statName = stat['text'].split(' ')[0].lower()
-                    homeStat = stat['homeValue'].split(' ')
-                    awayStat = stat['awayValue'].split(' ') 
-                    self.matchStats["{} won".format(statName)] = {'homeValue': homeStat[0], 'awayValue': awayStat[0]}
-                    self.matchStats["{} total".format(statName)] = {'homeValue': homeStat[2], 'awayValue': awayStat[2]}
-                else:
-                    statName = stat['text'].split(' ')[0].lower()
-                    statSubText = stat['text'].split(' ')[1].split('/')
-
-                    homeStat = stat['homeValue'].split(' / ')
-                    awayStat = stat['awayValue'].split(' / ') 
-                    self.matchStats["{} {}".format(statName, statSubText[0].lower())] = {'homeValue': homeStat[0][:-1], 'awayValue': awayStat[0][:-1]}
-                    self.matchStats["{} {}".format(statName, statSubText[1].lower())] = {'homeValue': homeStat[1][:-1], 'awayValue': awayStat[1][:-1]} 
-            else:
-                self.matchStats[item['text'].lower()] = {'homeValue': homeValue, 'awayValue': awayValue}
-        
-        for stat in matchDefending:
-            setPiece = stat['data']
-            statName = setPiece['text'].split(' ')[0].lower()
-            self.matchStats["{} won".format(statName)] = {'homeValue': setPiece['homeWon'], 'awayValue': setPiece['awayWon']}
-            self.matchStats["{} total".format(statName)] = {'homeValue': setPiece['homeTotal'], 'awayValue': setPiece['awayTotal']}
+        self.matchStats = {}
         self.players = {}
-        self.players[self.homeTeam['name']] = PlayerList(players['home']['team'] + players['home']['reserves'])
-        self.players[self.awayTeam['name']] = PlayerList(players['away']['team'] + players['away']['reserves'])
+
+        try:
+            dateParts = date[:10].split('-')
+            timeParts = date[11:-1].split(':')
+            self.date = datetime(int(dateParts[0]),
+                                int(dateParts[1]),
+                                int(dateParts[2]),
+                                int(timeParts[0]),
+                                int(timeParts[1]))
+            self.homeTeam = {'name': homeTeam['name'], 'abbrev': homeTeam['abbrev'], 'score': homeTeam['score']}
+            self.awayTeam = {'name': awayTeam['name'], 'abbrev': awayTeam['abbrev'], 'score': awayTeam['score']}
+            self.matchStats = {'points': {'homeValue': float(homeTeam['score']), 'awayValue': float(awayTeam['score'])}}
+
+            for item in dataVis + table + discipline + scores + attacking:
+                try:
+                    homeValue = float(item['homeValue'])
+                    awayValue = float(item['awayValue'])
+                except:
+                    homeValue = float(item['homeValue'][:-1])
+                    awayValue = float(item['awayValue'][:-1])
+                self.matchStats[item['text'].lower()] = {'homeValue': homeValue, 'awayValue': awayValue}
+            self.matchStats['penalties conceded'] = {'homeValue': float(penalties['homeTotal']), 'awayValue': float(penalties['awayTotal'])}
+            
+            # adjust tackles to remove missed tackles from the total
+            for value in ('homeValue', 'awayValue'):
+                self.matchStats['tackles'][value] = self.matchStats['tackles'][value] - self.matchStats['missed tackles'][value]
+            
+            for stat in matchAttacking:
+                if "/" in stat['homeValue']:
+                    if "Won" in stat['text']:
+                        statName = stat['text'].split(' ')[0].lower()
+                        homeStat = stat['homeValue'].split(' ')
+                        awayStat = stat['awayValue'].split(' ') 
+                        self.matchStats["{} won".format(statName)] = {'homeValue': homeStat[0], 'awayValue': awayStat[0]}
+                        self.matchStats["{} total".format(statName)] = {'homeValue': homeStat[2], 'awayValue': awayStat[2]}
+                    else:
+                        statName = stat['text'].split(' ')[0].lower()
+                        statSubText = stat['text'].split(' ')[1].split('/')
+
+                        homeStat = stat['homeValue'].split(' / ')
+                        awayStat = stat['awayValue'].split(' / ') 
+                        self.matchStats["{} {}".format(statName, statSubText[0].lower())] = {'homeValue': homeStat[0][:-1], 'awayValue': awayStat[0][:-1]}
+                        self.matchStats["{} {}".format(statName, statSubText[1].lower())] = {'homeValue': homeStat[1][:-1], 'awayValue': awayStat[1][:-1]} 
+                else:
+                    self.matchStats[item['text'].lower()] = {'homeValue': homeValue, 'awayValue': awayValue}
+            
+            for stat in matchDefending:
+                setPiece = stat['data']
+                statName = setPiece['text'].split(' ')[0].lower()
+                self.matchStats["{} won".format(statName)] = {'homeValue': setPiece['homeWon'], 'awayValue': setPiece['awayWon']}
+                self.matchStats["{} total".format(statName)] = {'homeValue': setPiece['homeTotal'], 'awayValue': setPiece['awayTotal']}
+            self.players[self.homeTeam['name']] = PlayerList(players['home']['team'] + players['home']['reserves'])
+            self.players[self.awayTeam['name']] = PlayerList(players['away']['team'] + players['away']['reserves'])
+        except:
+            print "Skipping {}".format(self)
     
     def __str__(self):
         """
