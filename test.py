@@ -77,7 +77,7 @@ def testDB():
     with Timer('Database Load') as t:
         db = RugbyDB()
     with Timer('Team Search') as t:
-        matches = db.getMatchesForTeam('munster')
+        matches = db.getMatchesForTeam('Munster')
 
 if __name__ == "__main__":
     testDB()    

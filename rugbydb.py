@@ -105,7 +105,7 @@ class RugbyDB():
                     for match in self.db[league][year].keys():
                         homeTeam = self.db[league][year][match]['gamePackage']['gameStrip']['teams']['home']['name'].lower()
                         awayTeam = self.db[league][year][match]['gamePackage']['gameStrip']['teams']['away']['name'].lower()
-                        if team in homeTeam or team in awayTeam:
+                        if team.lower() in homeTeam or team.lower() in awayTeam:
                             matches[match] = self.db[league][year][match]
         return matches
 

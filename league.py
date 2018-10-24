@@ -135,7 +135,7 @@ class League():
         teams = []
         for season in self._getSeasonList(season):
             teams.extend(self._matches[season].getAllTeams())
-        return team in teams
+        return team.lower() in teams
 
     def getMatchesInDateRange(self, startDate=None, endDate=None):
         """
