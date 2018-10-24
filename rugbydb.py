@@ -126,6 +126,11 @@ class RugbyDBReadWrite(RugbyDB):
         self.dbWritePath = os.path.join(CWD, "rugby_database_{}".format(str(timestamp.date())))
 
     def writeDbFile(self, league):
+        """
+        Write a league database file out
+        ARGS:
+            league (int) - league id to write file
+        """
         if not os.path.exists(self.dbWritePath):
             os.makedirs(self.dbWritePath)
         dbPath = os.path.join(self.dbWritePath, "{}.db".format(league))
@@ -137,12 +142,25 @@ class RugbyDBReadWrite(RugbyDB):
             print("Failed to update Database")
 
     def writeMatchDb(self):
+        """
+        Write the full database to file
+        """
         if not os.path.exists(self.dbWritePath):
             os.makedirs(self.dbWritePath)
         for league in self.db.keys():
             self.writeDbFile(league)
 
     def addToDb(self, leagueId, year, gameId, matchStr):
+        """
+        Add a new match to the database
+        ARGS:
+            leagueId (str) - id of the league of the match
+            year (str) - year/season string of the match
+            gameId (int) - id of the new match
+            matchStr (str) - full match dictionary string read from file or online
+        RETURNS:
+            bool - True if match added to database, False for failure to add to database
+        """
         if matchStr:
             matchStr = matchStr[:-1].replace('          window.__INITIAL_STATE__ = ', '')
             try:
@@ -168,6 +186,14 @@ class RugbyDBReadWrite(RugbyDB):
             return False
     
     def updateDbFromWeb(self, leagueId, year, force=False):
+        """
+        Update the database for a league by pulling stats from the internet
+        ARGS:
+            leagueId (str) - id of the league to update
+            year (str) - year/season string to update
+            force (bool) - True update the database for every match
+                           False only update if the match is not in the database
+        """
         for id in variables.MATCH_IDS[leagueId]['matchIds'][year]:
             if force or leagueId not in self.db.keys() or year not in self.db[leagueId].keys() or str(id) not in self.db[leagueId][year].keys():
                 gameId = str(id)
@@ -179,4 +205,3 @@ class RugbyDBReadWrite(RugbyDB):
                         matchStr = re.sub(r'[^\x00-\x7f]',r' ',line)
                         break
                 success = self.addToDb(leagueId, year, id, matchStr)
-                    
