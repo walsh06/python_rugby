@@ -1,5 +1,10 @@
 import json
 import os
+import re
+import requests
+import datetime
+
+import variables
 
 CWD = os.path.dirname(os.path.realpath(__file__))
 
@@ -16,7 +21,7 @@ def CachedDB():
         RUGBY_DB = RugbyDB()
     return RUGBY_DB
 
-class RugbyDB():
+class RugbyDB(object):
     """
     Class to load and manipulate the raw data
     """
@@ -111,3 +116,67 @@ class RugbyDB():
 
     def getMatchesForLeague(self, league):
         pass
+
+
+class RugbyDBReadWrite(RugbyDB):
+
+    def __init__(self):
+        super(RugbyDBReadWrite, self).__init__()
+        timestamp = datetime.datetime.now()
+        self.dbWritePath = os.path.join(CWD, "rugby_database_{}".format(str(timestamp.date())))
+
+    def writeDbFile(self, league):
+        if not os.path.exists(self.dbWritePath):
+            os.makedirs(self.dbWritePath)
+        dbPath = os.path.join(self.dbWritePath, "{}.db".format(league))
+        try:
+            with open(dbPath, "w") as dbFile:
+                dbFile.write(json.dumps(self.db[league], indent=4, sort_keys=True))
+        except Exception as e:
+            print(e)
+            print("Failed to update Database")
+
+    def writeMatchDb(self):
+        if not os.path.exists(self.dbWritePath):
+            os.makedirs(self.dbWritePath)
+        for league in self.db.keys():
+            self.writeDbFile(league)
+
+    def addToDb(self, leagueId, year, gameId, matchStr):
+        if matchStr:
+            matchStr = matchStr[:-1].replace('          window.__INITIAL_STATE__ = ', '')
+            try:
+                matchDict = json.loads(matchStr)
+            except:
+                print("Error getting game online - game id: {}, league id: {}".format(gameId, leagueId))
+                print(url)
+                print(matchStr)
+                return False
+            if leagueId not in self.db.keys():
+                self.db[leagueId] = {}
+            if year not in self.db[leagueId].keys():
+                self.db[leagueId][year] = {}
+            self.db[leagueId][year][gameId] = matchDict
+            self.writeDbFile(leagueId)
+            homeTeam = matchDict['gamePackage']['gameStrip']['teams']['home'] 
+            awayTeam = matchDict['gamePackage']['gameStrip']['teams']['away']
+            date = matchDict['gamePackage']['gameStrip']['isoDate']
+            print("Added: {} v {} - {}".format(homeTeam['name'], awayTeam['name'], date))
+            return True
+        else:
+            print("Failed to get match dict from {}".format(url))
+            return False
+    
+    def updateDbFromWeb(self, leagueId, year, force=False):
+        for id in variables.MATCH_IDS[leagueId]['matchIds'][year]:
+            if force or leagueId not in self.db.keys() or year not in self.db[leagueId].keys() or str(id) not in self.db[leagueId][year].keys():
+                gameId = str(id)
+                url = "http://www.espn.com/rugby/match?gameId={}&league={}".format(gameId, leagueId)
+                response = requests.get(url)
+                matchStr = ''
+                for line in response.text.splitlines():
+                    if 'window.__INITIAL_STATE__ =' in line:
+                        matchStr = re.sub(r'[^\x00-\x7f]',r' ',line)
+                        break
+                success = self.addToDb(leagueId, year, id, matchStr)
+                    
