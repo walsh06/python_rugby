@@ -223,8 +223,8 @@ class Match():
                                 int(dateParts[2]),
                                 int(timeParts[0]),
                                 int(timeParts[1]))
-            self.homeTeam = {'name': homeTeam['name'], 'abbrev': homeTeam['abbrev'], 'score': homeTeam['score']}
-            self.awayTeam = {'name': awayTeam['name'], 'abbrev': awayTeam['abbrev'], 'score': awayTeam['score']}
+            self.homeTeam = {'name': homeTeam['name'].lower(), 'abbrev': homeTeam['abbrev'], 'score': homeTeam['score']}
+            self.awayTeam = {'name': awayTeam['name'].lower(), 'abbrev': awayTeam['abbrev'], 'score': awayTeam['score']}
             self.matchStats = {'points': {'homeValue': float(homeTeam['score']), 'awayValue': float(awayTeam['score'])}}
 
             for item in dataVis + table + discipline + scores + attacking:
@@ -274,7 +274,7 @@ class Match():
         """
         String representation of a match
         """
-        return "{} v {} - {}".format(self.homeTeam['name'], self.awayTeam['name'], self.date)
+        return "{} v {} - {}".format(self.homeTeam['name'].capitalize, self.awayTeam['name'].capitalize(), self.date)
 
     def getAllStatHeaders(self):
         """
@@ -293,9 +293,9 @@ class Match():
         RETURNS:
             str - homeValue/awayValue for the team or None if team is not in the match
         """
-        if team.lower() == self.homeTeam['name'].lower():
+        if team.lower() == self.homeTeam['name']:
             return 'homeValue'
-        elif team.lower() == self.awayTeam['name'].lower():
+        elif team.lower() == self.awayTeam['name']:
             return 'awayValue'
         else:
             return None
