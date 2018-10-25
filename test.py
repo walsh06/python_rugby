@@ -66,6 +66,10 @@ def testMatch():
     checkResult("Match - get stat for team", m.getStatForTeam, ['Ireland', 'Points'], 30)
     checkResult("Match - get wrong stat for team", m.getStatForTeam, ['Ireland', 'FakeStat'], None)
     checkResult("Match - get stat for wrong team", m.getStatForTeam, ['FakeTeam', 'FakeStat'], None)
+    checkResult("Match - get Opposition", m.getOpposition, ['Ireland'], 'wales')
+    checkResult("Match - get Opposition Stat", m.getStatForOpposition, ['Ireland', 'Points'], 22)
+    checkResult("Match - is team playing True", m.isTeamPlaying, ['Ireland'], True)
+    checkResult("Match - is team playing False", m.isTeamPlaying, ['France'], False)
 
 def testPlayer():
     m = Match.fromMatchId('133782')

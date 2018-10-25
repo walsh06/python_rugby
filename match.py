@@ -300,6 +300,43 @@ class Match():
         else:
             return None
 
+    def isTeamPlaying(self, team):
+        """
+        Check if a given team is playing in this match
+        ARGS:
+            team (str) - team name to check
+        RETURNS:
+            bool - True = team is playing in the match
+                   False = team is not playing in the match
+        """
+        return False if self.getHomeAwayValue(team) is None else True
+
+    def getOpposition(self, team):
+        """
+        Get the team name of the opposition to the team provided
+        ARGS:
+            team (str) - team name to find their opposition in the match
+        RETURNS:
+            str - team name of the opposition or None if the team argument is not found in the match
+        """
+        if team.lower() == self.homeTeam['name']:
+            return self.awayTeam['name']
+        elif team.lower() == self.awayTeam['name']:
+            return self.homeTeam['name']
+        else:
+            return None
+
+    def getStatForOpposition(self, team, stat):
+        """
+        Get the stat for the opposition of the team provided
+        ARGS:
+            team (str) - team to look for their opposition
+            stat (str) - name of the stat value to get
+        RETURNS:
+            float - value of the stat or None if not found
+        """
+        return self.getStatForTeam(self.getOpposition(team), stat)
+
     def getStatForTeam(self, team, stat):
         """
         Return a stats value for a given team if they played in the match
