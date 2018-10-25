@@ -105,6 +105,12 @@ class MatchEventList():
         """
         self.matchEvents = matchEvents
     
+    def __len__(self):
+        """
+        len implementation for MatchEventList
+        """
+        return len(self.matchEvents)
+
     def __iter__(self):
         """
         Iterator implementation for MatchEventList
