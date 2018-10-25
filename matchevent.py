@@ -34,7 +34,13 @@ class MatchEvent():
                             12: 'End of game',
                             9999: 'Text Event'}
         self.type = type
-        self.time = int(time.replace("'", ""))
+        time = time.replace("'", "")
+        if '+' in time:
+            self.time = int(time.split('+')[0])
+            self.addedTime =int(time.split('+')[1])
+        else:
+            self.time = int(time)
+            self.addedTime = 0
         self.text = text
         self.homeScore = homeScore
         self.awayScore = awayScore
@@ -51,7 +57,7 @@ class MatchEvent():
         """
         Return the string name for a match event type
         """
-        return self.typeStrings[self.type]
+        return self.typeStrings[self.type] if self.type in self.typeStrings else self.type
 
     def isTry(self):
         return self.type == 1
@@ -95,8 +101,22 @@ class MatchEvent():
 
 class MatchEventList():
 
+    @classmethod
     def fromPlayerEventDict(cls, playerEventDict):
-        pass
+        """
+        Create a Match Event list for a player events in a match
+        ARGS:
+            playerEventDict (dict) - dict of events for a player in the form 
+                                     {eventType: ["timeOne", "timeTwo"]}, e.g.
+                                     {u'1': [u"59'"], u'3': [u"34'"], u'2': [u"50'", u"77'"]}
+        RETURNS
+            MatchEventList (obj) - list of match events for a player
+        """
+        events = []
+        for type in playerEventDict.keys():
+            for event in playerEventDict[type]:
+                events.append(MatchEvent(int(type), event))
+        return cls(events)
 
     def __init__(self, matchEvents=[]):
         """

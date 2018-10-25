@@ -1,4 +1,6 @@
 
+from matchevent import MatchEventList
+
 class Player():
     """
     Player class to store details and stats of a player in a single match
@@ -25,7 +27,8 @@ class Player():
         if 'missed tackles' in self.matchStats.keys():
             # adjust tackles to be completed tackles
             self.matchStats['tackles'] = self.matchStats['tackles'] - self.matchStats['missed tackles']
-
+        self.matchEvents = MatchEventList.fromPlayerEventDict(playerDict['eventTimes'])
+        
     def __str__(self):
         return "{}: {}".format(self.number, self.name)
 
