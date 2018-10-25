@@ -4,6 +4,7 @@ from rugbydb import RugbyDB, CachedDB
 from datetime import datetime
 
 from player import PlayerList
+from matchevent import MatchEvent, MatchEventList
 
 class MatchList():
     """
@@ -211,9 +212,11 @@ class Match():
         matchAttacking = matchDict['gamePackage']['matchAttacking']['col'][1][0]['data']
         matchDefending = matchDict['gamePackage']['matchDefending']['col'][0]
         players = matchDict['gamePackage']['matchLineUp']
-        
+        matchEvents = matchDict['gamePackage']['matchCommentary']['events']
+
         self.matchStats = {}
         self.players = {}
+        self.matchEventList = MatchEventList([])
 
         try:
             dateParts = date[:10].split('-')
@@ -267,6 +270,10 @@ class Match():
                 self.matchStats["{} total".format(statName)] = {'homeValue': setPiece['homeTotal'], 'awayValue': setPiece['awayTotal']}
             self.players[self.homeTeam['name']] = PlayerList(players['home']['team'] + players['home']['reserves'])
             self.players[self.awayTeam['name']] = PlayerList(players['away']['team'] + players['away']['reserves'])
+
+
+            for event in matchEvents:
+                self.matchEventList.addMatchEvent(MatchEvent.fromMatchEventDict(event))
         except:
             print "Skipping {}".format(self)
     

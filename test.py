@@ -4,6 +4,7 @@ import datetime
 from league import League
 from match import MatchList, Match
 from rugbydb import RugbyDB
+from matchevent import MatchEvent, MatchEventList
 
 class Timer():
 
@@ -71,6 +72,20 @@ def testMatch():
     checkResult("Match - is team playing True", m.isTeamPlaying, ['Ireland'], True)
     checkResult("Match - is team playing False", m.isTeamPlaying, ['France'], False)
 
+def testMatchEvent():
+    testEvent = {u'homeScore': 0, u'awayScore': 5, u'time': u"11'", u'type': 1, u'text': u'Try - Simon Zebo , Ireland'}
+    testEvent = MatchEvent.fromMatchEventDict(testEvent)
+    checkResult("Match Event - test is try", testEvent.isTry, [], True)
+    checkResult("Match Event - test is not conversion", testEvent.isConversion, [], False)
+    checkResult("Match Event - test type string", cmp, [testEvent.typeString, 'Try'], 0)
+
+def testMatchEventList():
+    testEvents = [{u'homeScore': 0, u'awayScore': 5, u'time': u"11'", u'type': 1, u'text': u'Try - Simon Zebo , Ireland'}, {'homeScore': 0, u'awayScore': 7, u'time': u"12'", u'type': 2, u'text': u'Conversion - Johnny Sexton , Ireland'}]
+    matchEventList = MatchEventList([MatchEvent.fromMatchEventDict(testEvents[0]),
+                                     MatchEvent.fromMatchEventDict(testEvents[1])])
+    tryList = matchEventList.getAllEventsForType(1)
+    checkResult('Match Event List - test filter by type', len, [tryList], 1)
+
 def testPlayer():
     m = Match.fromMatchId('133782')
     player = m.players[m.homeTeam['name']].getPlayer(0)
@@ -89,4 +104,6 @@ if __name__ == "__main__":
     testMatchList()
     testMatch()
     testPlayer()
+    testMatchEvent()
+    testMatchEventList()
 
