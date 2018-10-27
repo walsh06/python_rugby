@@ -1,5 +1,5 @@
-from python_rugby.match import MatchList
-from python_rugby.league import League
+from match import MatchList
+from league import League
 
 def getAveragePointsScored(team, seasons=None):
     """

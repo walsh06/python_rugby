@@ -281,7 +281,7 @@ class Match():
         """
         String representation of a match
         """
-        return "{} v {} - {}".format(self.homeTeam['name'].capitalize, self.awayTeam['name'].capitalize(), self.date)
+        return "{} v {} - {}".format(self.homeTeam['name'].capitalize(), self.awayTeam['name'].capitalize(), self.date)
 
     def getAllStatHeaders(self):
         """
