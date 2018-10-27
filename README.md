@@ -8,6 +8,7 @@ Feel free to clone or fork the repo and contribute what you can to the project. 
 |--- | --- |
 |Six Nations|2013-2018|
 |Rugby Championship|2017|
+|Internationals|June 18, November 17|
 |Champions Cup|17/18, 18/19|
 |Challenge Cup|17/18, 18/19|
 |Pro 14|17/18, 18/19|
