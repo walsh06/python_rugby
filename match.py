@@ -261,6 +261,12 @@ class Match():
                         self.matchStats["{} {}".format(statName, statSubText[0].lower())] = {'homeValue': homeStat[0][:-1], 'awayValue': awayStat[0][:-1]}
                         self.matchStats["{} {}".format(statName, statSubText[1].lower())] = {'homeValue': homeStat[1][:-1], 'awayValue': awayStat[1][:-1]} 
                 else:
+                    try:
+                        homeValue = float(stat['homeValue'])
+                        awayValue = float(stat['awayValue'])
+                    except:
+                        homeValue = float(stat['homeValue'][:-1])
+                        awayValue = float(stat['awayValue'][:-1])
                     self.matchStats[stat['text'].lower()] = {'homeValue': homeValue, 'awayValue': awayValue}
             
             for stat in matchDefending:
