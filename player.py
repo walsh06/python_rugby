@@ -31,18 +31,20 @@ class Player():
         self.matchEvents = MatchEventList.fromPlayerEventDict(playerDict['eventTimes'])
         self.minutesPlayed = None
         if matchEventList is not None:
-            subbed = False
+            subEvents = []
             for event in matchEventList:
-                if event.type == 7 and self.name in event.text:
-                    self.minutesPlayed = event.time
-                    subbed = True
-                    break
-                elif event.type == 8 and self.name in event.text:
-                    self.minutesPlayed = 80 - event.time
-                    subbed = True
-                    break
-            if not subbed:
-                self.minutesPlayed = 80
+                if (event.type == 7 or event.type == 8) and self.name in event.text:
+                    subEvents.append((event.time, event.type))
+            subOnTime = 0
+            self.minutesPlayed = 0
+            for event in sorted(subEvents):
+                if event[1] == 7:
+                    self.minutesPlayed += event[0] - subOnTime
+                    subOnTime = -1
+                elif event[1] == 8:
+                    subOnTime = event[0]
+            if not (int(self.number) > 15 and subOnTime == 0) and subOnTime != -1:
+                self.minutesPlayed += 80 - subOnTime  
 
     def __str__(self):
         return "{}: {}".format(self.number, self.name)
