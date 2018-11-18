@@ -274,12 +274,12 @@ class Match():
                 statName = setPiece['text'].split(' ')[0].lower()
                 self.matchStats["{} won".format(statName)] = {'homeValue': setPiece['homeWon'], 'awayValue': setPiece['awayWon']}
                 self.matchStats["{} total".format(statName)] = {'homeValue': setPiece['homeTotal'], 'awayValue': setPiece['awayTotal']}
-            self.players[self.homeTeam['name']] = PlayerList(players['home']['team'] + players['home']['reserves'])
-            self.players[self.awayTeam['name']] = PlayerList(players['away']['team'] + players['away']['reserves'])
-
-
+            
             for event in matchEvents:
                 self.matchEventList.addMatchEvent(MatchEvent.fromMatchEventDict(event))
+            
+            self.players[self.homeTeam['name']] = PlayerList(players['home']['team'] + players['home']['reserves'], self.matchEventList)
+            self.players[self.awayTeam['name']] = PlayerList(players['away']['team'] + players['away']['reserves'], self.matchEventList)
         except:
             print "Skipping {}".format(self)
     
