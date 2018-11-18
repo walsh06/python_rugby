@@ -6,10 +6,11 @@ class Player():
     Player class to store details and stats of a player in a single match
     """
 
-    def __init__(self, playerDict):
+    def __init__(self, playerDict, matchEventList=None):
         """
         ARGS:
             playerDict (dict) - dict for a player in a match stored in the database
+            matchEventList (MatchEventList) - MatchEventList object used to get minutes played
         """     
         self.name = playerDict['name']
         self.id = playerDict['id']
@@ -28,7 +29,21 @@ class Player():
             # adjust tackles to be completed tackles
             self.matchStats['tackles'] = self.matchStats['tackles'] - self.matchStats['missed tackles']
         self.matchEvents = MatchEventList.fromPlayerEventDict(playerDict['eventTimes'])
-        
+        self.minutesPlayed = None
+        if matchEventList is not None:
+            subbed = False
+            for event in matchEventList:
+                if event.type == 7 and self.name in event.text:
+                    self.minutesPlayed = event.time
+                    subbed = True
+                    break
+                elif event.type == 8 and self.name in event.text:
+                    self.minutesPlayed = 80 - event.time
+                    subbed = True
+                    break
+            if not subbed:
+                self.minutesPlayed = 80
+
     def __str__(self):
         return "{}: {}".format(self.number, self.name)
 
@@ -75,7 +90,7 @@ class PlayerSeries():
         self.id = standardInfo['id']
         self.playerMatches = []
         for playerDict in playerDictList:
-            self.playerMatches.append(PlayerMatch(playerDict))
+            self.playerMatches.append(Player(playerDict))
 
     def __str__(self):
         return self.name
@@ -111,14 +126,15 @@ class PlayerSeries():
 
 class PlayerList():
 
-    def __init__(self, playerDictList):
+    def __init__(self, playerDictList, matchEventList=None):
         """
         ARGS:
             playerDictList ([dict]) - List of player dicts from the database
+            matchEventList (MatchEventList) - MatchEventList object used to get minutes played
         """
         self.players = []
         for playerDict in playerDictList:
-            self.players.append(Player(playerDict))
+            self.players.append(Player(playerDict, matchEventList))
     
     def __len__(self):
         """
