@@ -71,6 +71,20 @@ class Player():
         """
         return self.getStat(stat)
 
+    def getStatPerEighty(self, stat):
+        """
+        Get the value of a given stat for the player, normalized for 80 mins
+        ARGS:
+            stat (str) - name of the stat to look for
+        RETURNS
+            float - stat value, None if stat not found
+        """
+        statValue = self.getStat(stat)
+        if statValue is not None:
+            statValue = statValue * (80/self.minutesPlayed)
+        return statValue
+
+
 class PlayerSeries():
     """
     Player class to store details and stats of a player in a series of matches
@@ -124,6 +138,34 @@ class PlayerSeries():
         """
         statTotal = self.getStat(stat)
         return statTotal/len(playerMatches) if statTotal is not None else None
+
+    def getStatPerEighty(self, stat):
+        """
+        Get the value of a given stat for the player, normalized for 80 mins
+        ARGS:
+            stat (str) - name of the stat to look for
+        RETURNS
+            float - stat value per 80 mins, None if stat not found
+        """
+        sumStats = 0
+        for match in self.playerMatches:
+            statValue = match.getStatPerEighty(stat)
+            if statValue is None:
+                return None
+            else:
+                sumStats += statValue
+        return sumStats/len(self.playerMatches)
+
+    def addPlayer(self, player):
+        """
+        Add a player to the list
+        ARGS:
+            player (Player) - add a player object to the list
+        """
+        if len(self.playerMatches) > 0:
+            if player.id != self.playerMatches[0].id:
+                raise Exception("Player Series must be for the same player")
+        self.players.append(player)
 
 
 class PlayerList():

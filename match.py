@@ -338,7 +338,7 @@ class Match():
             return self.homeTeam['name']
         else:
             return None
-
+    
     def getStatForOpposition(self, team, stat):
         """
         Get the stat for the opposition of the team provided
@@ -362,4 +362,41 @@ class Match():
         if stat.lower() in self.matchStats.keys():
             value = self.getHomeAwayValue(team)
             return self.matchStats[stat.lower()][value] if value is not None else None
+        return None
+
+    def isPlayerInGame(self, playerName):
+        """
+        Check if a player is playing in the match
+        ARGS:
+            playerName (str) - name of the player to search for
+        RETURNS:
+            bool, str - bool whether the player is found or not
+                        str for the team name if found, None if not found
+        """
+        for team, players in self.players.items():
+            for player in players:
+                if playerName == player.name:
+                    return True, team
+        return False, None
+
+    def getPlayer(self, playerName, team=None):
+        """
+        Get a player object from the match
+        ARGS:
+            playerName (str) - name of the player to search for
+            team (str) - name of the team to limit search for, returns None if team not in match
+        RETURNS:
+            Player (obj) - player object from the match, None if not found
+        """
+        if team is None:
+            teams = self.players.keys()
+        elif team.lower() in self.players.keys():
+            teams = [team.lower()]
+        else:
+            return None
+    
+        for team in teams:
+            for player in self.players[team]:
+                if playerName == player.name:
+                    return player
         return None
