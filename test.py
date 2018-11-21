@@ -71,6 +71,8 @@ def testMatch():
     checkResult("Match - get Opposition Stat", m.getStatForOpposition, ['Ireland', 'Points'], 22)
     checkResult("Match - is team playing True", m.isTeamPlaying, ['Ireland'], True)
     checkResult("Match - is team playing False", m.isTeamPlaying, ['France'], False)
+    checkResult("Match - is player in game True", m.isPlayerInGame, ['Conor Murray'], (True, 'ireland'))
+    checkResult("Match - is player in game False", m.isPlayerInGame, ['Fake Player'], (False, None))
 
 def testMatchEvent():
     testEvent = {u'homeScore': 0, u'awayScore': 5, u'time': u"11'", u'type': 1, u'text': u'Try - Simon Zebo , Ireland'}
@@ -91,6 +93,9 @@ def testPlayer():
     player = m.players[m.homeTeam['name']].getPlayer(0)
     checkResult("Player  - get stat for player", player.getStat, ['Tries'], 1)
     checkResult("Player  - get wrong stat for player", player.getStat, ['FakeStat'], None)
+    player.minutesPlayed = 20
+    player.matchStats['tries'] = 1
+    checkResult("Player - get stat per 80", player.getStatPerEighty, ['Tries'], 4)
 
 def testDB():
     with Timer('Database Load') as t:
