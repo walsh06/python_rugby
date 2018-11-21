@@ -280,8 +280,9 @@ class Match():
             
             self.players[self.homeTeam['name']] = PlayerList(players['home']['team'] + players['home']['reserves'], self.matchEventList)
             self.players[self.awayTeam['name']] = PlayerList(players['away']['team'] + players['away']['reserves'], self.matchEventList)
-        except:
+        except Exception as e:
             print "Skipping {}".format(self)
+            print str(e)
     
     def __str__(self):
         """

@@ -25,7 +25,7 @@ class Player():
                 stat = playerDict[key]
                 self.matchStats[stat['name'].lower()] = float(stat['value'])
         
-        if 'missed tackles' in self.matchStats.keys():
+        if 'missed tackles' in self.matchStats.keys() and self.matchStats['tackles'] >= self.matchStats['missed tackles']:
             # adjust tackles to be completed tackles
             self.matchStats['tackles'] = self.matchStats['tackles'] - self.matchStats['missed tackles']
         self.matchEvents = MatchEventList.fromPlayerEventDict(playerDict['eventTimes'])
@@ -81,7 +81,7 @@ class Player():
         """
         statValue = self.getStat(stat)
         if statValue is not None:
-            statValue = statValue * (80/self.minutesPlayed)
+            statValue = float(statValue) * (80.0/float(self.minutesPlayed))
         return statValue
 
 
@@ -220,7 +220,7 @@ class PlayerSeries(PlayerList):
                 return None
             else:
                 sumStats += statValue
-        return sumStats/len(self.players)
+        return sumStats/float(len(self.players))
 
     def addPlayer(self, player):
         """
