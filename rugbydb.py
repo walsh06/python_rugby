@@ -161,29 +161,26 @@ class RugbyDBReadWrite(RugbyDB):
         RETURNS:
             bool - True if match added to database, False for failure to add to database
         """
-        if matchStr:
-            matchStr = matchStr[:-1].replace('          window.__INITIAL_STATE__ = ', '')
-            try:
-                matchDict = json.loads(matchStr)
-            except:
-                print("Error getting game online - game id: {}, league id: {}".format(gameId, leagueId))
-                print(url)
-                print(matchStr)
-                return False
-            if leagueId not in self.db.keys():
-                self.db[leagueId] = {}
-            if year not in self.db[leagueId].keys():
-                self.db[leagueId][year] = {}
-            self.db[leagueId][year][gameId] = matchDict
-            self.writeDbFile(leagueId)
-            homeTeam = matchDict['gamePackage']['gameStrip']['teams']['home'] 
-            awayTeam = matchDict['gamePackage']['gameStrip']['teams']['away']
-            date = matchDict['gamePackage']['gameStrip']['isoDate']
-            print("Added: {} v {} - {}".format(homeTeam['name'], awayTeam['name'], date))
-            return True
-        else:
-            print("Failed to get match dict from {}".format(url))
+        matchStr = matchStr[:-1].replace('          window.__INITIAL_STATE__ = ', '')
+        try:
+            matchDict = json.loads(matchStr)
+        except:
+            print("Error getting game online - game id: {}, league id: {}".format(gameId, leagueId))
+            print(url)
+            print(matchStr)
             return False
+        if leagueId not in self.db.keys():
+            self.db[leagueId] = {}
+        if year not in self.db[leagueId].keys():
+            self.db[leagueId][year] = {}
+        self.db[leagueId][year][gameId] = matchDict
+        self.writeDbFile(leagueId)
+        homeTeam = matchDict['gamePackage']['gameStrip']['teams']['home'] 
+        awayTeam = matchDict['gamePackage']['gameStrip']['teams']['away']
+        date = matchDict['gamePackage']['gameStrip']['isoDate']
+        print("Added: {} v {} - {}".format(homeTeam['name'], awayTeam['name'], date))
+        return True
+
     
     def updateDbFromWeb(self, leagueId, year, force=False):
         """
@@ -204,4 +201,8 @@ class RugbyDBReadWrite(RugbyDB):
                     if 'window.__INITIAL_STATE__ =' in line:
                         matchStr = re.sub(r'[^\x00-\x7f]',r' ',line)
                         break
-                success = self.addToDb(leagueId, year, id, matchStr)
+                if matchStr:
+                    success = self.addToDb(leagueId, year, id, matchStr)
+                else:
+                    print("Failed to get match dict from {}".format(url))
+                    return False
