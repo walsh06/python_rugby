@@ -14,7 +14,8 @@ MATCH_RE = re.compile(r'[^\x00-\x7f]')
 
 def CachedDB():
     """
-    Use the cached database to avoid reloading the database multiple times
+    Use the cached database to avoid reloading the database multiple times.
+
     RETURNS:  
         RugbyDB (obj) - RugbyDB object  
     """
@@ -26,7 +27,7 @@ def CachedDB():
 
 class RugbyDB:
     """
-    Class to load and manipulate the raw data
+    Class to load and manipulate the raw data.
     """
 
     def __init__(self):
@@ -39,7 +40,7 @@ class RugbyDB:
     
     def loadDb(self):
         """
-        Load the database into memory
+        Load the database into memory.
         """
         for db in os.listdir(self.dbPath):
             if "backup" not in db:
@@ -50,7 +51,8 @@ class RugbyDB:
 
     def _getMatchesDictList(self, ids, leagues=None, seasons=None):
         """
-        Returns list of match dicts for the given parameters
+        Returns list of match dicts for the given parameters.
+
         ARGS:
             ids ([str]) - list of match ids to search for
             leagues ([str]) - list of league ids to search, default all leagues
@@ -80,7 +82,8 @@ class RugbyDB:
 
     def getMatchById(self, id):
         """
-        Get a match dictionary for a given id
+        Get a match dictionary for a given id.
+
         ARGS:
             id (str) - match id to search for
         RETURNS:
@@ -91,7 +94,8 @@ class RugbyDB:
 
     def getMatchesForTeam(self, team, leagues=None, seasons=None):
         """
-        Return a list of match dictionaries for a given team name
+        Return a list of match dictionaries for a given team name.
+
         ARGS:
             team ([str]) - list of team names to search for
             leagues ([str]) - list of league ids to search, default all leagues
@@ -103,18 +107,18 @@ class RugbyDB:
         if not leagues:
             leagues = list(self.db)
         for league in leagues:
-            if not seasons:
-                yearList = list(self.db[league])
+            if seasons:
+                yearList = self.db[league].keys() | set(seasons)
             else:
-                yearList = seasons
+                yearList = self.db[league].keys()
 
             for year in yearList:
-                if year in self.db[league]:
-                    for match_id, match in self.db[league][year].items():
-                        homeTeam = match['gamePackage']['gameStrip']['teams']['home']['name'].lower()
-                        awayTeam = match['gamePackage']['gameStrip']['teams']['away']['name'].lower()
-                        if team.lower() == homeTeam or team.lower() == awayTeam:
-                            matches[match_id] = match
+                for match_id, match in self.db[league][year].items():
+                    teams_dict = match['gamePackage']['gameStrip']['teams']
+                    homeTeam = teams_dict['home']['name'].lower()
+                    awayTeam = teams_dict['away']['name'].lower()
+                    if team.lower() in {homeTeam, awayTeam}:
+                        matches[match_id] = match
         return matches
 
     def getMatchesForLeague(self, league):
@@ -123,19 +127,22 @@ class RugbyDB:
 
 class RugbyDBReadWrite(RugbyDB):
 
+    BASE_URL = "http://www.espn.com/rugby/match?gameId={game}&league={league}"
+
     def __init__(self):
         super(RugbyDBReadWrite, self).__init__()
-        timestamp = datetime.datetime.now()
-        self.dbWritePath = os.path.join(CWD, "rugby_database_{}".format(str(timestamp.date())))
+        today = datetime.date.today()
+        self.dbWritePath = os.path.join(CWD, "rugby_database_{}".format(today))
+        if not os.path.exists(self.dbWritePath):
+            os.makedirs(self.dbWritePath)
 
     def writeDbFile(self, league):
         """
-        Write a league database file out
+        Write a league database file out.
+
         ARGS:
             league (int) - league id to write file
         """
-        if not os.path.exists(self.dbWritePath):
-            os.makedirs(self.dbWritePath)
         dbPath = os.path.join(self.dbWritePath, "{}.db".format(league))
         try:
             with open(dbPath, "w") as dbFile:
@@ -146,10 +153,8 @@ class RugbyDBReadWrite(RugbyDB):
 
     def writeMatchDb(self):
         """
-        Write the full database to file
+        Write the full database to file.
         """
-        if not os.path.exists(self.dbWritePath):
-            os.makedirs(self.dbWritePath)
         for league in self.db:
             self.writeDbFile(league)
 
@@ -177,15 +182,17 @@ class RugbyDBReadWrite(RugbyDB):
             self.db[leagueId][year] = {}
         self.db[leagueId][year][gameId] = matchDict
         self.writeDbFile(leagueId)
-        homeTeam = matchDict['gamePackage']['gameStrip']['teams']['home'] 
-        awayTeam = matchDict['gamePackage']['gameStrip']['teams']['away']
-        date = matchDict['gamePackage']['gameStrip']['isoDate']
-        print(("Added: {} v {} - {}".format(homeTeam['name'], awayTeam['name'], date)))
+        game = matchDict['gamePackage']['gameStrip']
+        homeTeam = game['teams']['home']
+        awayTeam = game['teams']['away']
+        date = game['isoDate']
+        print("Added: {} v {} - {}".format(homeTeam['name'], awayTeam['name'], date))
         return True
     
     def updateDbFromWeb(self, leagueId, year, force=False):
         """
-        Update the database for a league by pulling stats from the internet
+        Update the database for a league by pulling stats from the internet.
+
         ARGS:
             leagueId (str) - id of the league to update
             year (str) - year/season string to update
@@ -197,8 +204,7 @@ class RugbyDBReadWrite(RugbyDB):
                     or leagueId not in self.db
                     or year not in self.db[leagueId]
                     or str(match_id) not in self.db[leagueId][year])):
-                gameId = str(match_id)
-                url = "http://www.espn.com/rugby/match?gameId={}&league={}".format(gameId, leagueId)
+                url = self.BASE_URL.format(game=match_id, league=leagueId)
                 response = requests.get(url)
                 matchStr = ''
                 for line in response.text.splitlines():

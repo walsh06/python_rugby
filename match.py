@@ -13,7 +13,8 @@ class MatchList:
     @classmethod
     def createMatchListForTeam(cls, teamName, leagues=None, seasons=None):
         """
-        Create a match list for a specific team, filter by league or seasons
+        Create a match list for a specific team, filter by league or seasons.
+
         ARGS:
             teamName (str) - name of the team
             leagues ([int]) - list of league ids to filter by, search all leagues if None
@@ -22,8 +23,10 @@ class MatchList:
             MatchList - MatchList object
         """
         db = CachedDB()
-        matchIds = db.getMatchesForTeam(teamName.lower(), leagues=leagues, seasons=seasons)
-        return cls(matchIds)
+        match_ids = db.getMatchesForTeam(teamName.lower(),
+                                         leagues=leagues,
+                                         seasons=seasons)
+        return cls(match_ids)
 
     @classmethod
     def createMatchListForLeague(cls, leagueId):
@@ -52,27 +55,29 @@ class MatchList:
         """
         Len representation of MatchList
         """
-        return len(self._matches.keys())
+        return len(self._matches)
 
-    def __add__(aMatchList, bMatchList):
+    def __add__(self, bMatchList):
         """
-        Override add operator to add two matchlists together
+        Override add operator to add two matchlists together.
         """
         for id in bMatchList._matches:
-            aMatchList.addMatch(id, bMatchList._matches[id])
-        return aMatchList
+            self.addMatch(id, bMatchList._matches[id])
+        return self
 
     def getMatchIds(self):
         """
-        Return all match ids in the MatchList
+        Return all match ids in the MatchList.
+
         RETURNS:
             [int] - list of match ids
         """
-        return sorted(self._matches.keys())
+        return sorted(self._matches)
 
     def getAllTeams(self):
         """
-        Return list of teams that play in the MatchList
+        Return list of teams that play in the MatchListю
+
         RETURNS:
             [str] - list of team names
         """
@@ -84,14 +89,15 @@ class MatchList:
 
     def __iter__(self):
         """
-        Iterator implementation for MatchList
+        Iterator implementation for MatchList.
         """
         self.currentMatchIndex = -1
         return self
 
     def __next__(self):
         """
-        Iterator implementation for MatchList
+        Iterator implementation for MatchList.
+
         RETURNS:
             Match (obj) - returns next match object in list
         """
@@ -104,7 +110,8 @@ class MatchList:
     
     def addMatch(self, id, match):
         """
-        Add a new match to the matchlist
+        Add a new match to the matchlist.
+
         ARGS:
             id (int) - match id of the new match
             match (Match) - match to add
@@ -113,7 +120,8 @@ class MatchList:
 
     def getMatchesInDateRange(self, startDate=datetime.min, endDate=datetime.max):
         """
-        Filter MatchList for a given date range, returns a new MatchList
+        Filter MatchList for a given date range, returns a new MatchList.
+
         ARGS:
             startDate (datetime) - start date in range to search, default to datetime.min
             endDate (datetime) - end date in range to search, default to datetime.max
@@ -129,9 +137,10 @@ class MatchList:
 
 class MatchListLite(MatchList):
     """
-    Lite version of MatchList which doesnt load all matches
+    Lite version of MatchList which doesnt load all matches.
+
     Used to store matchIds only and overrides functionality 
-    that accessed Match object data
+    that accessed Match object data.
     """
     def __init__(self, matchIds):
         """
@@ -142,7 +151,8 @@ class MatchListLite(MatchList):
 
     def getAllTeams(self):
         """
-        Returns an empty list as MatchListLite does not have access to Match data
+        Returns an empty list as MatchListLite doesn't have access to Match data.
+
         RETURNS:
             [] - empty list
         """
@@ -150,7 +160,8 @@ class MatchListLite(MatchList):
 
     def __next__(self):
         """
-        Iterator implementation for MatchList
+        Iterator implementation for MatchList.
+
         RETURNS:
             int - returns next match id in list
         """
@@ -163,7 +174,8 @@ class MatchListLite(MatchList):
 
     def getMatchesInDateRange(self, startDate=None, endDate=None):
         """
-        Not implemented for MatchListLite
+        Not implemented for MatchListLite.
+
         ARGS:
             startDate (datetime) - start date in range to search
             endDate (datetime) - end date in range to search
@@ -178,35 +190,35 @@ class Match:
     @classmethod
     def fromMatchId(cls, matchId):
         """
-        Create a Match object from match id
+        Create a Match object from match id.
+
         ARGS:
             matchId (int) - id for a match to create object for
         RETURNS
             Match (obj) - Match object
         """
         matchDict = CachedDB().getMatchById(matchId)
-        if matchDict is None:
-            return None
-        return cls(matchDict)
+        return cls(matchDict) if matchDict else None
 
     def __init__(self, matchDict):
         """
         ARGS:
             matchDict (dict) - dictionary storing match information from database
         """
-        homeTeam = matchDict['gamePackage']['gameStrip']['teams']['home'] 
-        awayTeam = matchDict['gamePackage']['gameStrip']['teams']['away']
-        date = matchDict['gamePackage']['gameStrip']['isoDate']
-        dataVis = matchDict['gamePackage']['matchStats']['dataVis']
-        table = matchDict['gamePackage']['matchStats']['table']
-        scores = matchDict['gamePackage']['matchEvents']['col'][0][0]['data']
-        attacking = matchDict['gamePackage']['matchEvents']['col'][1][1]['data']
-        discipline = matchDict['gamePackage']['matchDiscipline']['col'][1][0]['data']
-        penalties = matchDict['gamePackage']['matchDiscipline']['col'][0][0]['data']
-        matchAttacking = matchDict['gamePackage']['matchAttacking']['col'][1][0]['data']
-        matchDefending = matchDict['gamePackage']['matchDefending']['col'][0]
-        players = matchDict['gamePackage']['matchLineUp']
-        matchEvents = matchDict['gamePackage']['matchCommentary']['events']
+        game = matchDict['gamePackage']
+        homeTeam = game['gameStrip']['teams']['home']
+        awayTeam = game['gameStrip']['teams']['away']
+        date = game['gameStrip']['isoDate']
+        dataVis = game['matchStats']['dataVis']
+        table = game['matchStats']['table']
+        scores = game['matchEvents']['col'][0][0]['data']
+        attacking = game['matchEvents']['col'][1][1]['data']
+        discipline = game['matchDiscipline']['col'][1][0]['data']
+        penalties = game['matchDiscipline']['col'][0][0]['data']
+        matchAttacking = game['matchAttacking']['col'][1][0]['data']
+        matchDefending = game['matchDefending']['col'][0]
+        players = game['matchLineUp']
+        matchEvents = game['matchCommentary']['events']
 
         self.matchStats = {}
         self.players = {}
@@ -216,13 +228,26 @@ class Match:
             dateParts = date[:10].split('-')
             timeParts = date[11:-1].split(':')
             self.date = datetime(int(dateParts[0]),
-                                int(dateParts[1]),
-                                int(dateParts[2]),
-                                int(timeParts[0]),
-                                int(timeParts[1]))
-            self.homeTeam = {'name': homeTeam['name'].lower(), 'abbrev': homeTeam['abbrev'], 'score': homeTeam['score']}
-            self.awayTeam = {'name': awayTeam['name'].lower(), 'abbrev': awayTeam['abbrev'], 'score': awayTeam['score']}
-            self.matchStats = {'points': {'homeValue': float(homeTeam['score']), 'awayValue': float(awayTeam['score'])}}
+                                 int(dateParts[1]),
+                                 int(dateParts[2]),
+                                 int(timeParts[0]),
+                                 int(timeParts[1]))
+            self.homeTeam = {
+                'name': homeTeam['name'].lower(),
+                'abbrev': homeTeam['abbrev'],
+                'score': homeTeam['score'],
+            }
+            self.awayTeam = {
+                'name': awayTeam['name'].lower(),
+                'abbrev': awayTeam['abbrev'],
+                'score': awayTeam['score'],
+            }
+            self.matchStats = {
+                'points': {
+                    'homeValue': float(homeTeam['score']),
+                    'awayValue': float(awayTeam['score']),
+                }
+            }
 
             for item in dataVis + table + discipline + scores + attacking:
                 try:
@@ -231,8 +256,14 @@ class Match:
                 except:
                     homeValue = float(item['homeValue'][:-1])
                     awayValue = float(item['awayValue'][:-1])
-                self.matchStats[item['text'].lower()] = {'homeValue': homeValue, 'awayValue': awayValue}
-            self.matchStats['penalties conceded'] = {'homeValue': float(penalties['homeTotal']), 'awayValue': float(penalties['awayTotal'])}
+                self.matchStats[item['text'].lower()] = {
+                    'homeValue': homeValue,
+                    'awayValue': awayValue,
+                }
+            self.matchStats['penalties conceded'] = {
+                'homeValue': float(penalties['homeTotal']),
+                'awayValue': float(penalties['awayTotal']),
+            }
             
             # adjust tackles to remove missed tackles from the total
             for value in ('homeValue', 'awayValue'):
@@ -244,16 +275,28 @@ class Match:
                         statName = stat['text'].split(' ')[0].lower()
                         homeStat = stat['homeValue'].split(' ')
                         awayStat = stat['awayValue'].split(' ') 
-                        self.matchStats["{} won".format(statName)] = {'homeValue': homeStat[0], 'awayValue': awayStat[0]}
-                        self.matchStats["{} total".format(statName)] = {'homeValue': homeStat[2], 'awayValue': awayStat[2]}
+                        self.matchStats["{} won".format(statName)] = {
+                            'homeValue': homeStat[0],
+                            'awayValue': awayStat[0],
+                        }
+                        self.matchStats["{} total".format(statName)] = {
+                            'homeValue': homeStat[2],
+                            'awayValue': awayStat[2],
+                        }
                     else:
                         statName = stat['text'].split(' ')[0].lower()
                         statSubText = stat['text'].split(' ')[1].split('/')
 
                         homeStat = stat['homeValue'].split(' / ')
                         awayStat = stat['awayValue'].split(' / ') 
-                        self.matchStats["{} {}".format(statName, statSubText[0].lower())] = {'homeValue': homeStat[0][:-1], 'awayValue': awayStat[0][:-1]}
-                        self.matchStats["{} {}".format(statName, statSubText[1].lower())] = {'homeValue': homeStat[1][:-1], 'awayValue': awayStat[1][:-1]} 
+                        self.matchStats["{} {}".format(statName, statSubText[0].lower())] = {
+                            'homeValue': homeStat[0][:-1],
+                            'awayValue': awayStat[0][:-1],
+                        }
+                        self.matchStats["{} {}".format(statName, statSubText[1].lower())] = {
+                            'homeValue': homeStat[1][:-1],
+                            'awayValue': awayStat[1][:-1],
+                        }
                 else:
                     try:
                         homeValue = float(stat['homeValue'])
@@ -261,41 +304,59 @@ class Match:
                     except:
                         homeValue = float(stat['homeValue'][:-1])
                         awayValue = float(stat['awayValue'][:-1])
-                    self.matchStats[stat['text'].lower()] = {'homeValue': homeValue, 'awayValue': awayValue}
+                    self.matchStats[stat['text'].lower()] = {
+                        'homeValue': homeValue,
+                        'awayValue': awayValue,
+                    }
             
             for stat in matchDefending:
                 setPiece = stat['data']
                 statName = setPiece['text'].split(' ')[0].lower()
-                self.matchStats["{} won".format(statName)] = {'homeValue': setPiece['homeWon'], 'awayValue': setPiece['awayWon']}
-                self.matchStats["{} total".format(statName)] = {'homeValue': setPiece['homeTotal'], 'awayValue': setPiece['awayTotal']}
+                self.matchStats["{} won".format(statName)] = {
+                    'homeValue': setPiece['homeWon'],
+                    'awayValue': setPiece['awayWon'],
+                }
+                self.matchStats["{} total".format(statName)] = {
+                    'homeValue': setPiece['homeTotal'],
+                    'awayValue': setPiece['awayTotal'],
+                }
             
             for event in matchEvents:
                 self.matchEventList.addMatchEvent(MatchEvent.fromMatchEventDict(event))
             
-            self.players[self.homeTeam['name']] = PlayerList(players['home']['team'] + players['home']['reserves'], self.matchEventList)
-            self.players[self.awayTeam['name']] = PlayerList(players['away']['team'] + players['away']['reserves'], self.matchEventList)
+            self.players[self.homeTeam['name']] = PlayerList(
+                players['home']['team'] + players['home']['reserves'],
+                self.matchEventList,
+            )
+            self.players[self.awayTeam['name']] = PlayerList(
+                players['away']['team'] + players['away']['reserves'],
+                self.matchEventList,
+            )
         except Exception as e:
             print("Skipping {}".format(self))
             print(str(e))
     
     def __str__(self):
         """
-        String representation of a match
+        String representation of a match.
         """
-        return "{} v {} - {}".format(self.homeTeam['name'].capitalize(), self.awayTeam['name'].capitalize(), self.date)
+        return "{} v {} - {}".format(self.homeTeam['name'].capitalize(),
+                                     self.awayTeam['name'].capitalize(),
+                                     self.date)
 
     def getAllStatHeaders(self):
         """
-        Return all possibles stats for the match
+        Return all possibles stats for the match.
+
         RETURNS:
             [str] - list of stat headers for the match
         """
-        return sorted(self.matchStats.keys())
+        return sorted(self.matchStats)
 
     def getHomeAwayValue(self, team):
         """
-        Return homeValue or awayValue depending on whether the
-        team is home or away
+        Return homeValue or awayValue depending on whether the team is home or away.
+
         ARGS:
             team (str) - team name
         RETURNS:
@@ -305,38 +366,40 @@ class Match:
             return 'homeValue'
         elif team.lower() == self.awayTeam['name']:
             return 'awayValue'
-        else:
-            return None
+        return None
 
     def isTeamPlaying(self, team):
         """
-        Check if a given team is playing in this match
+        Check if a given team is playing in this match.
+
         ARGS:
             team (str) - team name to check
         RETURNS:
             bool - True = team is playing in the match
                    False = team is not playing in the match
         """
-        return False if self.getHomeAwayValue(team) is None else True
+        return bool(self.getHomeAwayValue(team))
 
     def getOpposition(self, team):
         """
-        Get the team name of the opposition to the team provided
+        Get the team name of the opposition to the team provided.
+
         ARGS:
             team (str) - team name to find their opposition in the match
         RETURNS:
-            str - team name of the opposition or None if the team argument is not found in the match
+            str - team name of the opposition
+                  or None if the team argument is not found in the match
         """
         if team.lower() == self.homeTeam['name']:
             return self.awayTeam['name']
         elif team.lower() == self.awayTeam['name']:
             return self.homeTeam['name']
-        else:
-            return None
+        return None
     
     def getStatForOpposition(self, team, stat):
         """
-        Get the stat for the opposition of the team provided
+        Get the stat for the opposition of the team provided.
+
         ARGS:
             team (str) - team to look for their opposition
             stat (str) - name of the stat value to get
@@ -347,7 +410,7 @@ class Match:
 
     def getStatForTeam(self, team, stat):
         """
-        Return a stats value for a given team if they played in the match
+        Return a stats value for a given team if they played in the match.
         ARGS:
             team (str) - team name
             stat (str) - stat name to get
@@ -361,7 +424,8 @@ class Match:
 
     def isPlayerInGame(self, playerName):
         """
-        Check if a player is playing in the match
+        Check if a player is playing in the match.
+
         ARGS:
             playerName (str) - name of the player to search for
         RETURNS:
@@ -376,15 +440,17 @@ class Match:
 
     def getPlayer(self, playerName, team=None):
         """
-        Get a player object from the match
+        Get a player object from the match.
+
         ARGS:
             playerName (str) - name of the player to search for
-            team (str) - name of the team to limit search for, returns None if team not in match
+            team (str) - name of the team to limit search for,
+                         returns None if team not in match
         RETURNS:
             Player (obj) - player object from the match, None if not found
         """
         if team is None:
-            teams = self.players.keys()
+            teams = list(self.players)
         elif team.lower() in self.players:
             teams = [team.lower()]
         else:

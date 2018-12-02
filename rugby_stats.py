@@ -4,7 +4,8 @@ from league import League
 
 def getAveragePointsScored(team, seasons=None):
     """
-    Get average points scored by a team, limit it by season
+    Get average points scored by a team, limit it by season.
+
     ARGS:
         team (str) - team name
         seasons (str) - season string to limit search, None is all seasons
@@ -16,7 +17,8 @@ def getAveragePointsScored(team, seasons=None):
 
 def getAverageStatForTeam(stat, team, seasons=None):
     """
-    Get average of a stat for a team, limit it by season
+    Get average of a stat for a team, limit it by season.
+
     ARGS:
         stat (str) - name of stat to search for
         team (str) - team name
@@ -25,23 +27,24 @@ def getAverageStatForTeam(stat, team, seasons=None):
         float - average of stats
     """
     matchList = MatchList.createMatchListForTeam(team, seasons=seasons)
-    statTotal = 0
-    matches = 0
+    matches, statTotal = 0, 0
     for match in matchList:
         statTotal += match.getStatForTeam(team, stat)
         matches += 1
-    return float(statTotal)/float(matches)
+    return statTotal / matches
 
 
 def getPlayerStatInMatches(matchList, stat):
     """
-    Get a list of all players in the list of matches and their total for the stat
-    in each match
+    Get a list of all players in the list of matches
+    and their total for the stat in each match.
+
     ARGS:
         matchList (MatchList) - list of matches to search
         stat (str) - name of the stat to get for each player
     RETURNS:
-        [(str, str, float),] - list of tuples sorted by value, in the form (playerName, teamName, statValue)
+        [(str, str, float),] - list of tuples sorted by value, in the form
+                               (playerName, teamName, statValue)
     """
     playerStats = []
     for match in matchList:
@@ -53,30 +56,34 @@ def getPlayerStatInMatches(matchList, stat):
 
 def getTeamStatInMatches(matchList, stat):
     """
-    Get a list of all teams in the list of matches and their total for the stat
-    in each match
+    Get a list of all teams in the list of matches
+    and their total for the stat in each match.
+
     ARGS:
         matchList (MatchList) - list of matches to search
         stat (str) - name of the stat to get for each player
     RETURNS:
-        [(str, float),] - list of tuples sorted by value, in the form (teamName, statValue)
+        [(str, float),] - list of tuples sorted by value, in the form
+                          (teamName, statValue)
     """
-    teamStats = []
-    for match in matchList:
-        for team in match.players:
-            teamStats.append((team, match.getStatForTeam(team,stat)))
+    teamStats = [
+        (team, match.getStatForTeam(team, stat))
+        for match in matchList for team in match.players
+    ]
     return sorted(teamStats, key=lambda tup: tup[1], reverse=True)
 
 
 def getLeagueLeadersForStatTotal(leagueName, season, stat):
     """
-    Get the league leaders for a given stat in a season
+    Get the league leaders for a given stat in a season.
+
     ARGS:
         leagueName (str) - name of the league
         season (str) - seasons string to search
         stat (str) - stat name to get leaders for
     RETURNS:
-        [(str, str, float),] - list of tuples sorted by value, in the form (playerName, teamName, statValue)
+        [(str, str, float),] - list of tuples sorted by value, in the form
+                               (playerName, teamName, statValue)
     """
     leagueLeadersDict = {}
     league = League.fromLeagueName(leagueName)

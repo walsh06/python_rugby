@@ -3,41 +3,48 @@ class MatchEvent:
     @classmethod
     def fromMatchEventDict(cls, matchEventDict):
         """
-        Create a Match Event from the dictionary in a Match
+        Create a Match Event from the dictionary in a Match.
+
         ARGS:
             matchEventDict (dict) - dictionary for a single match event read from a match dictionary
         RETURNS:
             MatchEvent (obj) - new MatchEvent object
         """
-        return cls(matchEventDict['type'], matchEventDict['time'], matchEventDict['text'], matchEventDict['homeScore'], matchEventDict['awayScore'])
+        return cls(matchEventDict['type'],
+                   matchEventDict['time'],
+                   matchEventDict['text'],
+                   matchEventDict['homeScore'],
+                   matchEventDict['awayScore'])
 
-    def __init__(self, type, time, text="", homeScore=None, awayScore=None):
+    def __init__(self, type_, time, text="", homeScore=None, awayScore=None):
         """
         ARGS:
-            type (int) - type of the event
+            type_ (int) - type of the event
             time (str) - minute of the time in the match
             text (str) - text of the event
             homeScore (int) - score for the home team after the event
             awayScore (int) - score for the away team after the event
         """
-        self.typeStrings = {1: 'Try',
-                            2: 'Conversion',
-                            3: 'Penalty',
-                            4: 'Drop Goal',
-                            5: 'Yellow Card',
-                            6: 'Red Card',
-                            7: 'Sub Off',
-                            8: 'Sub On',
-                            9: 'Game Start',
-                            10: 'End of first half',
-                            11: 'Start of Second Half',
-                            12: 'End of game',
-                            9999: 'Text Event'}
-        self.type = type
+        self.typeStrings = {
+            1: 'Try',
+            2: 'Conversion',
+            3: 'Penalty',
+            4: 'Drop Goal',
+            5: 'Yellow Card',
+            6: 'Red Card',
+            7: 'Sub Off',
+            8: 'Sub On',
+            9: 'Game Start',
+            10: 'End of first half',
+            11: 'Start of Second Half',
+            12: 'End of game',
+            9999: 'Text Event'
+        }
+        self.type = type_
         time = time.replace("'", "")
         if '+' in time:
             self.time = int(time.split('+')[0])
-            self.addedTime =int(time.split('+')[1])
+            self.addedTime = int(time.split('+')[1])
         else:
             self.time = int(time)
             self.addedTime = 0
@@ -47,15 +54,15 @@ class MatchEvent:
 
     def __str__(self):
         """
-        String representation for a Match Event
+        String representation for a Match Event.
         """
-        score = ", {}-{}".format(self.homeScore, self.awayScore) if self.homeScore is not None else ""
+        score = ", {}-{}".format(self.homeScore, self.awayScore) if self.homeScore else ""
         return "{}: {}, {} {}".format(self.time, self.typeString, self.text, score)
 
     @property
     def typeString(self):
         """
-        Return the string name for a match event type
+        Return the string name for a match event type.
         """
         return self.typeStrings[self.type] if self.type in self.typeStrings else self.type
 
@@ -104,36 +111,37 @@ class MatchEventList:
     @classmethod
     def fromPlayerEventDict(cls, playerEventDict):
         """
-        Create a Match Event list for a player events in a match
+        Create a Match Event list for a player events in a match.
+
         ARGS:
             playerEventDict (dict) - dict of events for a player in the form 
                                      {eventType: ["timeOne", "timeTwo"]}, e.g.
-                                     {u'1': [u"59'"], u'3': [u"34'"], u'2': [u"50'", u"77'"]}
+                                     {'1': ["59'"], '3': ["34'"], '2': ["50'", "77'"]}
         RETURNS
             MatchEventList (obj) - list of match events for a player
         """
         events = []
         for type_ in playerEventDict:
-            for event in playerEventDict[type_]:
-                events.append(MatchEvent(int(type_), event))
+            events.extend([MatchEvent(int(type_), event)
+                           for event in playerEventDict[type_]])
         return cls(events)
 
-    def __init__(self, matchEvents=[]):
+    def __init__(self, matchEvents=None):
         """
         ARGS:
             matchEvents ([MatchEvent]) - list of MatchEvents to store in the list
         """
-        self.matchEvents = matchEvents
+        self.matchEvents = matchEvents or []
     
     def __len__(self):
         """
-        len implementation for MatchEventList
+        len implementation for MatchEventList.
         """
         return len(self.matchEvents)
 
     def __iter__(self):
         """
-        Iterator implementation for MatchEventList
+        Iterator implementation for MatchEventList.
         """
         self.currentIndex = -1
         return self
@@ -152,22 +160,24 @@ class MatchEventList:
 
     def addMatchEvent(self, MatchEvent):
         """
-        Add a new match event to the list
+        Add a new match event to the list.
+
         ARGS:
             MatchEvent (obj) - new MatchEvent to add
         """
         self.matchEvents.append(MatchEvent)
 
-    def getAllEventsForType(self, type):
+    def getAllEventsForType(self, type_):
         """
-        Return a new MatchEventList filtered by type
+        Return a new MatchEventList filtered by type.
+        
         ARGS:
-            type (int) - type to filter the list by
+            type_ (int) - type to filter the list by
         RETURNS:
             MatchEventList - list with filtered MatchEvents
         """
-        matchEvents = MatchEventList(matchEvents=[])
+        matchEvents = MatchEventList()
         for matchEvent in self.matchEvents:
-            if matchEvent.type == type:
+            if matchEvent.type == type_:
                 matchEvents.addMatchEvent(matchEvent)
         return matchEvents

@@ -140,6 +140,7 @@ def testDB():
 
 
 if __name__ == "__main__":
+    print('Test suite started...')
     testDB()    
     testLeague()
     testMatchList()
@@ -147,3 +148,4 @@ if __name__ == "__main__":
     testPlayer()
     testMatchEvent()
     testMatchEventList()
+    print('Test suite is over.')

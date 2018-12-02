@@ -3,7 +3,7 @@ from matchevent import MatchEventList
 
 class Player:
     """
-    Player class to store details and stats of a player in a single match
+    Player class to store details and stats of a player in a single match.
     """
 
     def __init__(self, playerDict, matchEventList=None):
@@ -21,10 +21,10 @@ class Player:
         self.eventTimes = playerDict['eventTimes']
         self.matchStats = {}
         for key in playerDict:
-            if type(playerDict[key]) is dict and key != 'eventTimes':
+            if isinstance(playerDict[key], dict) and key != 'eventTimes':
                 stat = playerDict[key]
                 self.matchStats[stat['name'].lower()] = float(stat['value'])
-        
+
         if 'missed tackles' in self.matchStats and self.matchStats['tackles'] >= self.matchStats['missed tackles']:
             # adjust tackles to be completed tackles
             self.matchStats['tackles'] = self.matchStats['tackles'] - self.matchStats['missed tackles']
@@ -33,7 +33,7 @@ class Player:
         if matchEventList is not None:
             subEvents = []
             for event in matchEventList:
-                if (event.type == 7 or event.type == 8) and self.name in event.text:
+                if (event.type in {7, 8}) and self.name in event.text:
                     subEvents.append((event.time, event.type))
             subOnTime = 0
             self.minutesPlayed = 0
@@ -51,7 +51,8 @@ class Player:
 
     def getStat(self, stat):
         """
-        Get the value of a given stat for the player
+        Get the value of a given stat for the player.
+
         ARGS:
             stat (str) - name of the stat to look for
         RETURNS
@@ -61,7 +62,8 @@ class Player:
 
     def getStatAverage(self, stat):
         """
-        Get the average value of a given stat for the player
+        Get the average value of a given stat for the player.
+
         ARGS:
             stat (str) - name of the stat to look for
         RETURNS
@@ -71,15 +73,16 @@ class Player:
 
     def getStatPerEighty(self, stat):
         """
-        Get the value of a given stat for the player, normalized for 80 mins
+        Get the value of a given stat for the player, normalized for 80 mins.
+
         ARGS:
             stat (str) - name of the stat to look for
         RETURNS
             float - stat value, None if stat not found
         """
         statValue = self.getStat(stat)
-        if statValue is not None:
-            statValue = float(statValue) * (80.0/float(self.minutesPlayed))
+        if statValue:
+            statValue = statValue * (80.0 / self.minutesPlayed)
         return statValue
 
 
@@ -91,34 +94,34 @@ class PlayerList:
             playerDictList ([dict]) - List of player dicts from the database
             matchEventList (MatchEventList) - MatchEventList object used to get minutes played
         """
-        self.players = []
-        for playerDict in playerDictList:
-            self.players.append(Player(playerDict, matchEventList))
-    
+        self.players = [Player(playerDict, matchEventList)
+                        for playerDict in playerDictList]
+
     def __len__(self):
         """
-        Len representation of PlayerList
+        Len representation of PlayerList.
         """
         return len(self.players)
 
-    def __add__(aPlayerList, bPlayerList):
+    def __add__(self, bPlayerList):
         """
         Override add operator to add two PlayerLists together
         """
         for bPlayer in bPlayerList:
-            aPlayerList.addPlayer(bPlayer)
-        return aPlayerList
+            self.addPlayer(bPlayer)
+        return self
     
     def __iter__(self):
         """
-        Iterator implementation for MatchList
+        Iterator implementation for MatchList.
         """
         self.currentIndex = -1
         return self
 
     def __next__(self):
         """
-        Iterator implementation for PlayerList
+        Iterator implementation for PlayerList.
+
         RETURNS:
             Player (obj) - returns next player object in list
         """
@@ -130,18 +133,20 @@ class PlayerList:
 
     def getPlayer(self, index):
         """
-        Return player at index in player list
+        Return player at index in player list.
+
         ARGS:
             index (int) - index in list, None if index is not in list
         """
-        if index > -1 and index < len(self.players):
+        if -1 < index < len(self.players):
             return self.players[index]
         else:
             return None
 
     def addPlayer(self, player):
         """
-        Add a player to the list
+        Add a player to the list.
+
         ARGS:
             player (Player) - add a player object to the list
         """
@@ -150,8 +155,9 @@ class PlayerList:
 
 class PlayerSeries(PlayerList):
     """
-    Player class to store details and stats of a player in a series of matches
-    The player must be the same in all matches otherwise an exception is raised
+    Player class to store details and stats of a player in a series of matches.
+
+    The player must be the same in all matches otherwise an exception is raised.
     """
 
     def __init__(self, playerDictList):
@@ -160,24 +166,23 @@ class PlayerSeries(PlayerList):
             playerDictList ([dict]) - List of player dicts from the database
         """
         if playerDictList:
-            checkId = playerDictList[0]['id']
-            for playerDict in playerDictList[1:]:
-                if lastId != playerDict['id']:
-                    raise Exception("Player Series must take a list of player dicts of the same player")
+            ids = [player['id'] for player in playerDictList]
+            if len(list(set(ids))) > 1:
+                raise Exception("Player Series must take a list of player dicts of the same player")
 
             standardInfo = playerDictList[0]
             self.name = standardInfo['name']
             self.id = standardInfo['id']
-        self.players = []
-        for playerDict in playerDictList:
-            self.players.append(Player(playerDict))
+
+        self.players = [Player(playerDict) for playerDict in playerDictList]
 
     def __str__(self):
         return self.name
 
     def getStat(self, stat):
         """
-        Get the total value of a given stat for the player in all matches
+        Get the total value of a given stat for the player in all matches.
+
         ARGS:
             stat (str) - name of the stat to look for
         RETURNS
@@ -194,18 +199,20 @@ class PlayerSeries(PlayerList):
     
     def getStatAverage(self, stat):
         """
-        Get the average value of a given stat for the player
+        Get the average value of a given stat for the player.
+
         ARGS:
             stat (str) - name of the stat to look for
         RETURNS
             float - stat value, None if stat not found
         """
         statTotal = self.getStat(stat)
-        return statTotal/len(self.players) if statTotal is not None else None
+        return statTotal / len(self.players) if statTotal is not None else None
 
     def getStatPerEighty(self, stat):
         """
-        Get the value of a given stat for the player, normalized for 80 mins
+        Get the value of a given stat for the player, normalized for 80 mins.
+
         ARGS:
             stat (str) - name of the stat to look for
         RETURNS
@@ -218,18 +225,18 @@ class PlayerSeries(PlayerList):
                 return None
             else:
                 sumStats += statValue
-        return sumStats/float(len(self.players))
+        return sumStats / float(len(self.players))
 
     def addPlayer(self, player):
         """
-        Add a player to the list
+        Add a player to the list.
+
         ARGS:
             player (Player) - add a player object to the list
         """
-        if len(self.players) > 0:
-            if player.id != self.id:
-                raise Exception("Player Series must be for the same player")
-        else:
-            self.name = player.name
-            self.id = player.id
+        if self.players and player.id != self.id:
+            raise Exception("Player Series must be for the same player")
+
+        self.name = player.name
+        self.id = player.id
         self.players.append(player)
