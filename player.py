@@ -6,33 +6,33 @@ class Player:
     Player class to store details and stats of a player in a single match.
     """
 
-    def __init__(self, playerDict, matchEventList=None):
+    def __init__(self, player_dict, match_event_list=None):
         """
         ARGS:
-            playerDict (dict) - dict for a player in a match stored in the database
-            matchEventList (MatchEventList) - MatchEventList object used to get minutes played
+            player_dict (dict) - dict for a player in a match stored in the database
+            match_event_list (MatchEventList) - MatchEventList object used to get minutes played
         """     
-        self.name = playerDict['name']
-        self.id = playerDict['id']
-        self.number = playerDict['number']
-        self.position = playerDict['position']
-        self.isCaptain = playerDict['captain']
-        self.subbed = playerDict['subbed']
-        self.eventTimes = playerDict['eventTimes']
+        self.name = player_dict['name']
+        self.id = player_dict['id']
+        self.number = player_dict['number']
+        self.position = player_dict['position']
+        self.isCaptain = player_dict['captain']
+        self.subbed = player_dict['subbed']
+        self.eventTimes = player_dict['eventTimes']
         self.matchStats = {}
-        for key in playerDict:
-            if isinstance(playerDict[key], dict) and key != 'eventTimes':
-                stat = playerDict[key]
+        for key in player_dict:
+            if isinstance(player_dict[key], dict) and key != 'eventTimes':
+                stat = player_dict[key]
                 self.matchStats[stat['name'].lower()] = float(stat['value'])
 
         if 'missed tackles' in self.matchStats and self.matchStats['tackles'] >= self.matchStats['missed tackles']:
             # adjust tackles to be completed tackles
             self.matchStats['tackles'] = self.matchStats['tackles'] - self.matchStats['missed tackles']
-        self.matchEvents = MatchEventList.fromPlayerEventDict(playerDict['eventTimes'])
+        self.matchEvents = MatchEventList.fromPlayerEventDict(player_dict['eventTimes'])
         self.minutesPlayed = None
-        if matchEventList is not None:
+        if match_event_list is not None:
             subEvents = []
-            for event in matchEventList:
+            for event in match_event_list:
                 if (event.type in {7, 8}) and self.name in event.text:
                     subEvents.append((event.time, event.type))
             subOnTime = 0
@@ -88,14 +88,14 @@ class Player:
 
 class PlayerList:
 
-    def __init__(self, playerDictList, matchEventList=None):
+    def __init__(self, player_dict_list, match_event_list=None):
         """
         ARGS:
-            playerDictList ([dict]) - List of player dicts from the database
-            matchEventList (MatchEventList) - MatchEventList object used to get minutes played
+            player_dict_list ([dict]) - List of player dicts from the database
+            match_event_list (MatchEventList) - MatchEventList object used to get minutes played
         """
-        self.players = [Player(playerDict, matchEventList)
-                        for playerDict in playerDictList]
+        self.players = [Player(playerDict, match_event_list)
+                        for playerDict in player_dict_list]
 
     def __len__(self):
         """
@@ -103,12 +103,12 @@ class PlayerList:
         """
         return len(self.players)
 
-    def __add__(self, bPlayerList):
+    def __add__(self, another_list):
         """
         Override add operator to add two PlayerLists together
         """
-        for bPlayer in bPlayerList:
-            self.addPlayer(bPlayer)
+        for player in another_list:
+            self.addPlayer(player)
         return self
     
     def __iter__(self):
@@ -160,21 +160,22 @@ class PlayerSeries(PlayerList):
     The player must be the same in all matches otherwise an exception is raised.
     """
 
-    def __init__(self, playerDictList):
+    def __init__(self, player_dict_list):
         """
         ARGS:
-            playerDictList ([dict]) - List of player dicts from the database
+            player_dict_list ([dict]) - List of player dicts from the database
         """
-        if playerDictList:
-            ids = [player['id'] for player in playerDictList]
+        if player_dict_list:
+            ids = [player['id'] for player in player_dict_list]
             if len(list(set(ids))) > 1:
-                raise Exception("Player Series must take a list of player dicts of the same player")
+                msg = "Player Series must take a list of player dicts of the same player"
+                raise Exception(msg)
 
-            standardInfo = playerDictList[0]
+            standardInfo = player_dict_list[0]
             self.name = standardInfo['name']
             self.id = standardInfo['id']
 
-        self.players = [Player(playerDict) for playerDict in playerDictList]
+        self.players = [Player(player_dict) for player_dict in player_dict_list]
 
     def __str__(self):
         return self.name

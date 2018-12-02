@@ -158,30 +158,30 @@ class RugbyDBReadWrite(RugbyDB):
         for league in self.db:
             self.writeDbFile(league)
 
-    def addToDb(self, leagueId, year, gameId, matchStr):
+    def addToDb(self, league_id, year, game_id, match_str):
         """
         Add a new match to the database
         ARGS:
-            leagueId (str) - id of the league of the match
+            league_id (str) - id of the league of the match
             year (str) - year/season string of the match
-            gameId (int) - id of the new match
-            matchStr (str) - full match dictionary string read from file or online
+            game_id (int) - id of the new match
+            match_str (str) - full match dictionary string read from file or online
         RETURNS:
             bool - True if match added to database, False for failure to add to database
         """
-        matchStr = matchStr[:-1].replace('          window.__INITIAL_STATE__ = ', '')
+        match_str = match_str[:-1].replace('          window.__INITIAL_STATE__ = ', '')
         try:
-            matchDict = json.loads(matchStr)
+            matchDict = json.loads(match_str)
         except:
-            print(("Error getting game online - game id: {}, league id: {}".format(gameId, leagueId)))
-            print(matchStr)
+            print(("Error getting game online - game id: {}, league id: {}".format(game_id, league_id)))
+            print(match_str)
             return False
-        if leagueId not in self.db:
-            self.db[leagueId] = {}
-        if year not in self.db[leagueId]:
-            self.db[leagueId][year] = {}
-        self.db[leagueId][year][gameId] = matchDict
-        self.writeDbFile(leagueId)
+        if league_id not in self.db:
+            self.db[league_id] = {}
+        if year not in self.db[league_id]:
+            self.db[league_id][year] = {}
+        self.db[league_id][year][game_id] = matchDict
+        self.writeDbFile(league_id)
         game = matchDict['gamePackage']['gameStrip']
         homeTeam = game['teams']['home']
         awayTeam = game['teams']['away']
@@ -189,22 +189,22 @@ class RugbyDBReadWrite(RugbyDB):
         print("Added: {} v {} - {}".format(homeTeam['name'], awayTeam['name'], date))
         return True
     
-    def updateDbFromWeb(self, leagueId, year, force=False):
+    def updateDbFromWeb(self, league_id, year, force=False):
         """
         Update the database for a league by pulling stats from the internet.
 
         ARGS:
-            leagueId (str) - id of the league to update
+            league_id (str) - id of the league to update
             year (str) - year/season string to update
             force (bool) - True update the database for every match
                            False only update if the match is not in the database
         """
-        for match_id in MATCH_IDS[leagueId]['matchIds'][year]:
+        for match_id in MATCH_IDS[league_id]['matchIds'][year]:
             if any((force
-                    or leagueId not in self.db
-                    or year not in self.db[leagueId]
-                    or str(match_id) not in self.db[leagueId][year])):
-                url = self.BASE_URL.format(game=match_id, league=leagueId)
+                    or league_id not in self.db
+                    or year not in self.db[league_id]
+                    or str(match_id) not in self.db[league_id][year])):
+                url = self.BASE_URL.format(game=match_id, league=league_id)
                 response = requests.get(url)
                 matchStr = ''
                 for line in response.text.splitlines():
@@ -212,7 +212,7 @@ class RugbyDBReadWrite(RugbyDB):
                         matchStr = MATCH_RE.sub(r' ', line)
                         break
                 if matchStr:
-                    success = self.addToDb(leagueId, year, match_id, matchStr)
+                    success = self.addToDb(league_id, year, match_id, matchStr)
                 else:
                     print("Failed to get match dict from {}".format(url))
                     return False

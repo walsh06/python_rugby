@@ -1,29 +1,30 @@
 class MatchEvent:
 
     @classmethod
-    def fromMatchEventDict(cls, matchEventDict):
+    def fromMatchEventDict(cls, match_event_dict):
         """
         Create a Match Event from the dictionary in a Match.
 
         ARGS:
-            matchEventDict (dict) - dictionary for a single match event read from a match dictionary
+            match_event_dict (dict) - dictionary for a single match event
+                                      read from a match dictionary
         RETURNS:
             MatchEvent (obj) - new MatchEvent object
         """
-        return cls(matchEventDict['type'],
-                   matchEventDict['time'],
-                   matchEventDict['text'],
-                   matchEventDict['homeScore'],
-                   matchEventDict['awayScore'])
+        return cls(match_event_dict['type'],
+                   match_event_dict['time'],
+                   match_event_dict['text'],
+                   match_event_dict['homeScore'],
+                   match_event_dict['awayScore'])
 
-    def __init__(self, type_, time, text="", homeScore=None, awayScore=None):
+    def __init__(self, type_, time, text="", home_score=None, away_score=None):
         """
         ARGS:
             type_ (int) - type of the event
             time (str) - minute of the time in the match
             text (str) - text of the event
-            homeScore (int) - score for the home team after the event
-            awayScore (int) - score for the away team after the event
+            home_score (int) - score for the home team after the event
+            away_score (int) - score for the away team after the event
         """
         self.typeStrings = {
             1: 'Try',
@@ -49,8 +50,8 @@ class MatchEvent:
             self.time = int(time)
             self.addedTime = 0
         self.text = text
-        self.homeScore = homeScore
-        self.awayScore = awayScore
+        self.homeScore = home_score
+        self.awayScore = away_score
 
     def __str__(self):
         """
@@ -109,29 +110,33 @@ class MatchEvent:
 class MatchEventList:
 
     @classmethod
-    def fromPlayerEventDict(cls, playerEventDict):
+    def fromPlayerEventDict(cls, player_event_dict):
         """
         Create a Match Event list for a player events in a match.
 
         ARGS:
-            playerEventDict (dict) - dict of events for a player in the form 
-                                     {eventType: ["timeOne", "timeTwo"]}, e.g.
-                                     {'1': ["59'"], '3': ["34'"], '2': ["50'", "77'"]}
+            player_event_dict (dict) - dict of events for a player in the form
+                                       {eventType: ["timeOne", "timeTwo"]}, e.g.
+                                       {
+                                         '1': ["59'"],
+                                         '3': ["34'"],
+                                         '2': ["50'", "77'"],
+                                       }
         RETURNS
             MatchEventList (obj) - list of match events for a player
         """
         events = []
-        for type_ in playerEventDict:
+        for type_ in player_event_dict:
             events.extend([MatchEvent(int(type_), event)
-                           for event in playerEventDict[type_]])
+                           for event in player_event_dict[type_]])
         return cls(events)
 
-    def __init__(self, matchEvents=None):
+    def __init__(self, match_events=None):
         """
         ARGS:
-            matchEvents ([MatchEvent]) - list of MatchEvents to store in the list
+            match_events ([MatchEvent]) - list of MatchEvents to store in the list
         """
-        self.matchEvents = matchEvents or []
+        self.matchEvents = match_events or []
     
     def __len__(self):
         """
@@ -158,14 +163,14 @@ class MatchEventList:
             self.currentIndex += 1
             return self.matchEvents[self.currentIndex]
 
-    def addMatchEvent(self, MatchEvent):
+    def addMatchEvent(self, match_event):
         """
         Add a new match event to the list.
 
         ARGS:
-            MatchEvent (obj) - new MatchEvent to add
+            match_event (obj) - new MatchEvent to add
         """
-        self.matchEvents.append(MatchEvent)
+        self.matchEvents.append(match_event)
 
     def getAllEventsForType(self, type_):
         """

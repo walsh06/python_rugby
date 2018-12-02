@@ -21,20 +21,20 @@ class Timer:
         print("Timer: {} - {:.2f}s".format(self.name, (end - self.start)))
 
 
-def checkResult(testName, func, args, expectedResult):
+def checkResult(test_name, func, args, expected):
     try:
         result = func(*args)
     except Exception as e:
-        print("Exception caught while running > {}".format(testName))
+        print("Exception caught while running > {}".format(test_name))
         print(">>> Exception: {}".format(repr(e)))
         return False
     
-    if result == expectedResult:
+    if result == expected:
         success = True
-        message = "{}: Success".format(testName)
+        message = "{}: Success".format(test_name)
     else:
         success = False
-        message = "{}: Fail\nExpected Result: {}\nResult: {}".format(testName, expectedResult, result)
+        message = "{}: Fail\nExpected Result: {}\nResult: {}".format(test_name, expected, result)
     print(message)
     return success
 
@@ -56,13 +56,13 @@ def testLeague():
                 [1, 2, 3, 4])
 
     with Timer('League Load') as t:
-        l = League('180659', 'Six Nations', initMatches=True)
+        l = League('180659', 'Six Nations', init_matches=True)
     startDate = datetime.datetime(2018, 3, 16)
     endDate = datetime.datetime(2018, 3, 18)
     filteredLeagueMatches = l.getMatchesInDateRange(startDate, endDate)
     checkResult('League - Test date range', len, [filteredLeagueMatches], 3)
 
-    l = League.fromLeagueName('Six Nations', initMatches=False)
+    l = League.fromLeagueName('Six Nations', init_matches=False)
     assert l.id == '180659', 'League - Test fromLeagueName failed'
 
 

@@ -34,33 +34,33 @@ def getAverageStatForTeam(stat, team, seasons=None):
     return statTotal / matches
 
 
-def getPlayerStatInMatches(matchList, stat):
+def getPlayerStatInMatches(match_list, stat):
     """
     Get a list of all players in the list of matches
     and their total for the stat in each match.
 
     ARGS:
-        matchList (MatchList) - list of matches to search
+        match_list (MatchList) - list of matches to search
         stat (str) - name of the stat to get for each player
     RETURNS:
         [(str, str, float),] - list of tuples sorted by value, in the form
                                (playerName, teamName, statValue)
     """
     playerStats = []
-    for match in matchList:
+    for match in match_list:
         for team in match.players:
             for player in match.players[team]:
                 playerStats.append((player.name, team, player.getStat(stat)))
     return sorted(playerStats, key=lambda tup: tup[2], reverse=True)
 
 
-def getTeamStatInMatches(matchList, stat):
+def getTeamStatInMatches(match_list, stat):
     """
     Get a list of all teams in the list of matches
     and their total for the stat in each match.
 
     ARGS:
-        matchList (MatchList) - list of matches to search
+        match_list (MatchList) - list of matches to search
         stat (str) - name of the stat to get for each player
     RETURNS:
         [(str, float),] - list of tuples sorted by value, in the form
@@ -68,17 +68,17 @@ def getTeamStatInMatches(matchList, stat):
     """
     teamStats = [
         (team, match.getStatForTeam(team, stat))
-        for match in matchList for team in match.players
+        for match in match_list for team in match.players
     ]
     return sorted(teamStats, key=lambda tup: tup[1], reverse=True)
 
 
-def getLeagueLeadersForStatTotal(leagueName, season, stat):
+def getLeagueLeadersForStatTotal(league_name, season, stat):
     """
     Get the league leaders for a given stat in a season.
 
     ARGS:
-        leagueName (str) - name of the league
+        league_name (str) - name of the league
         season (str) - seasons string to search
         stat (str) - stat name to get leaders for
     RETURNS:
@@ -86,7 +86,7 @@ def getLeagueLeadersForStatTotal(leagueName, season, stat):
                                (playerName, teamName, statValue)
     """
     leagueLeadersDict = {}
-    league = League.fromLeagueName(leagueName)
+    league = League.fromLeagueName(league_name)
     if league is not None:
         seasonMatchList = league._matches[season]
         for match in seasonMatchList:
