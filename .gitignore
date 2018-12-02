@@ -1,3 +1,6 @@
 *.pyc
 *_backup.db
 rugby_database_*
+.idea/
+.env/
+.venv/

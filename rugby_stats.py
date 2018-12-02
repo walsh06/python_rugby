@@ -1,6 +1,7 @@
 from match import MatchList
 from league import League
 
+
 def getAveragePointsScored(team, seasons=None):
     """
     Get average points scored by a team, limit it by season
@@ -44,7 +45,7 @@ def getPlayerStatInMatches(matchList, stat):
     """
     playerStats = []
     for match in matchList:
-        for team in match.players.keys():
+        for team in match.players:
             for player in match.players[team]:
                 playerStats.append((player.name, team, player.getStat(stat)))
     return sorted(playerStats, key=lambda tup: tup[2], reverse=True)
@@ -62,9 +63,10 @@ def getTeamStatInMatches(matchList, stat):
     """
     teamStats = []
     for match in matchList:
-        for team in match.players.keys():
+        for team in match.players:
             teamStats.append((team, match.getStatForTeam(team,stat)))
     return sorted(teamStats, key=lambda tup: tup[1], reverse=True)
+
 
 def getLeagueLeadersForStatTotal(leagueName, season, stat):
     """
@@ -81,12 +83,10 @@ def getLeagueLeadersForStatTotal(leagueName, season, stat):
     if league is not None:
         seasonMatchList = league._matches[season]
         for match in seasonMatchList:
-            for team in match.players.keys():
+            for team in match.players:
                 for player in match.players[team]:
                     if player.id in leagueLeadersDict:
                         leagueLeadersDict[player.id][2] += player.getStat(stat)
                     else:
                         leagueLeadersDict[player.id] = [player.name, team, player.getStat(stat)]
     return sorted(leagueLeadersDict.values(), key=lambda tup: tup[2], reverse=True)
-    
-

@@ -1,7 +1,7 @@
-
 from matchevent import MatchEventList
 
-class Player():
+
+class Player:
     """
     Player class to store details and stats of a player in a single match
     """
@@ -20,12 +20,12 @@ class Player():
         self.subbed = playerDict['subbed']
         self.eventTimes = playerDict['eventTimes']
         self.matchStats = {}
-        for key in playerDict.keys():
+        for key in playerDict:
             if type(playerDict[key]) is dict and key != 'eventTimes':
                 stat = playerDict[key]
                 self.matchStats[stat['name'].lower()] = float(stat['value'])
         
-        if 'missed tackles' in self.matchStats.keys() and self.matchStats['tackles'] >= self.matchStats['missed tackles']:
+        if 'missed tackles' in self.matchStats and self.matchStats['tackles'] >= self.matchStats['missed tackles']:
             # adjust tackles to be completed tackles
             self.matchStats['tackles'] = self.matchStats['tackles'] - self.matchStats['missed tackles']
         self.matchEvents = MatchEventList.fromPlayerEventDict(playerDict['eventTimes'])
@@ -57,9 +57,7 @@ class Player():
         RETURNS
             float - stat value, None if stat not found
         """
-        if stat.lower() in self.matchStats.keys():
-            return self.matchStats[stat.lower()]
-        return None
+        return self.matchStats.get(stat.lower())
 
     def getStatAverage(self, stat):
         """
@@ -85,7 +83,7 @@ class Player():
         return statValue
 
 
-class PlayerList():
+class PlayerList:
 
     def __init__(self, playerDictList, matchEventList=None):
         """
@@ -118,7 +116,7 @@ class PlayerList():
         self.currentIndex = -1
         return self
 
-    def next(self):
+    def __next__(self):
         """
         Iterator implementation for PlayerList
         RETURNS:

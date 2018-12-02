@@ -1,12 +1,11 @@
-import re
-
-from rugbydb import RugbyDB, CachedDB
 from datetime import datetime
 
-from player import PlayerList
 from matchevent import MatchEvent, MatchEventList
+from player import PlayerList
+from rugbydb import CachedDB
 
-class MatchList():
+
+class MatchList:
     """
     Class to store and manipulate Match objects
     """
@@ -59,7 +58,7 @@ class MatchList():
         """
         Override add operator to add two matchlists together
         """
-        for id in bMatchList._matches.keys():
+        for id in bMatchList._matches:
             aMatchList.addMatch(id, bMatchList._matches[id])
         return aMatchList
 
@@ -90,7 +89,7 @@ class MatchList():
         self.currentMatchIndex = -1
         return self
 
-    def next(self):
+    def __next__(self):
         """
         Iterator implementation for MatchList
         RETURNS:
@@ -112,7 +111,7 @@ class MatchList():
         """
         self._matches[id] = match
 
-    def getMatchesInDateRange(self, startDate=None, endDate=None):
+    def getMatchesInDateRange(self, startDate=datetime.min, endDate=datetime.max):
         """
         Filter MatchList for a given date range, returns a new MatchList
         ARGS:
@@ -122,14 +121,9 @@ class MatchList():
             MatchList (obj) - return new MatchList object with matches in date range
         """
         matches = MatchList(matchIds=[])
-        if startDate is None:
-            startDate = datetime.min
-        if endDate is None:
-            endDate = datetime.max
-        for id in self._matches.keys():
-            match = self._matches[id]
-            if match.date > startDate and match.date < endDate:
-                matches.addMatch(id, match)
+        for id_, match in self._matches.items():
+            if endDate > match.date > startDate:
+                matches.addMatch(id_, match)
         return matches
 
 
@@ -154,7 +148,7 @@ class MatchListLite(MatchList):
         """
         return []
 
-    def next(self):
+    def __next__(self):
         """
         Iterator implementation for MatchList
         RETURNS:
@@ -179,7 +173,7 @@ class MatchListLite(MatchList):
         return None
 
 
-class Match():
+class Match:
 
     @classmethod
     def fromMatchId(cls, matchId):
@@ -281,8 +275,8 @@ class Match():
             self.players[self.homeTeam['name']] = PlayerList(players['home']['team'] + players['home']['reserves'], self.matchEventList)
             self.players[self.awayTeam['name']] = PlayerList(players['away']['team'] + players['away']['reserves'], self.matchEventList)
         except Exception as e:
-            print "Skipping {}".format(self)
-            print str(e)
+            print("Skipping {}".format(self))
+            print(str(e))
     
     def __str__(self):
         """
@@ -360,7 +354,7 @@ class Match():
         RETURNS:
             float - value for stat or None if not found
         """
-        if stat.lower() in self.matchStats.keys():
+        if stat.lower() in self.matchStats:
             value = self.getHomeAwayValue(team)
             return self.matchStats[stat.lower()][value] if value is not None else None
         return None
@@ -391,7 +385,7 @@ class Match():
         """
         if team is None:
             teams = self.players.keys()
-        elif team.lower() in self.players.keys():
+        elif team.lower() in self.players:
             teams = [team.lower()]
         else:
             return None

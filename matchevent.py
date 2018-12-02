@@ -1,4 +1,4 @@
-class MatchEvent():
+class MatchEvent:
 
     @classmethod
     def fromMatchEventDict(cls, matchEventDict):
@@ -99,7 +99,7 @@ class MatchEvent():
         return self.type == 9999
 
 
-class MatchEventList():
+class MatchEventList:
 
     @classmethod
     def fromPlayerEventDict(cls, playerEventDict):
@@ -113,9 +113,9 @@ class MatchEventList():
             MatchEventList (obj) - list of match events for a player
         """
         events = []
-        for type in playerEventDict.keys():
-            for event in playerEventDict[type]:
-                events.append(MatchEvent(int(type), event))
+        for type_ in playerEventDict:
+            for event in playerEventDict[type_]:
+                events.append(MatchEvent(int(type_), event))
         return cls(events)
 
     def __init__(self, matchEvents=[]):
@@ -138,7 +138,7 @@ class MatchEventList():
         self.currentIndex = -1
         return self
 
-    def next(self):
+    def __next__(self):
         """
         Iterator implementation for MatchEventList
         RETURNS:
