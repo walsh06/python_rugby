@@ -43,15 +43,12 @@ def check_result(test_name, func, args, expected):
         print("Exception caught while running > {}".format(test_name))
         print(">>> Exception: {}".format(repr(e)))
         return False
-    
-    if result == expected:
-        success = True
-        message = "{}: Success".format(test_name)
-    else:
-        success = False
-        message = "{}: Fail\nExpected Result: {}\nResult: {}".format(test_name, expected, result)
-    print(message)
-    return success
+
+    fail = "{}: Fail\nExpected Result: {}\nResult: {}".format(
+        test_name, expected, result
+    )
+    assert result == expected, fail
+    print("{}: Success".format(test_name))
 
 
 def test_league():
@@ -125,8 +122,8 @@ def test_match_event_list():
 def test_player():
     m = Match.from_match_id('133782')
     player = m.players[m.home_team['name']].get_player(0)
-    check_result("Player  - get stat for player", player.get_stat, ['Tries'], 1)
-    check_result("Player  - get wrong stat for player", player.get_stat, ['FakeStat'], None)
+    check_result("Player - get stat for player", player.get_stat, ['Tries'], 1)
+    check_result("Player - get wrong stat for player", player.get_stat, ['FakeStat'], None)
     player.minutes_played = 20
     player.match_stats['tries'] = 1
     check_result("Player - get stat per 80", player.get_stat_per_eighty, ['Tries'], 4)
