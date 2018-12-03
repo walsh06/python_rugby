@@ -28,7 +28,7 @@ class Player:
         if 'missed tackles' in self.matchStats and self.matchStats['tackles'] >= self.matchStats['missed tackles']:
             # adjust tackles to be completed tackles
             self.matchStats['tackles'] = self.matchStats['tackles'] - self.matchStats['missed tackles']
-        self.matchEvents = MatchEventList.fromPlayerEventDict(player_dict['eventTimes'])
+        self.matchEvents = MatchEventList.from_dict(player_dict['eventTimes'])
         self.minutesPlayed = None
         if match_event_list is not None:
             subEvents = []
@@ -49,7 +49,7 @@ class Player:
     def __str__(self):
         return "{}: {}".format(self.number, self.name)
 
-    def getStat(self, stat):
+    def get_stat(self, stat):
         """
         Get the value of a given stat for the player.
 
@@ -60,7 +60,7 @@ class Player:
         """
         return self.matchStats.get(stat.lower())
 
-    def getStatAverage(self, stat):
+    def get_stat_average(self, stat):
         """
         Get the average value of a given stat for the player.
 
@@ -69,9 +69,9 @@ class Player:
         RETURNS
             float - stat value, None if stat not found
         """
-        return self.getStat(stat)
+        return self.get_stat(stat)
 
-    def getStatPerEighty(self, stat):
+    def get_stat_per_eighty(self, stat):
         """
         Get the value of a given stat for the player, normalized for 80 mins.
 
@@ -80,7 +80,7 @@ class Player:
         RETURNS
             float - stat value, None if stat not found
         """
-        statValue = self.getStat(stat)
+        statValue = self.get_stat(stat)
         if statValue:
             statValue = statValue * (80.0 / self.minutesPlayed)
         return statValue
@@ -108,7 +108,7 @@ class PlayerList:
         Override add operator to add two PlayerLists together
         """
         for player in another_list:
-            self.addPlayer(player)
+            self.add_player(player)
         return self
     
     def __iter__(self):
@@ -131,7 +131,7 @@ class PlayerList:
             self.currentIndex += 1
             return self.players[self.currentIndex]
 
-    def getPlayer(self, index):
+    def get_player(self, index):
         """
         Return player at index in player list.
 
@@ -143,7 +143,7 @@ class PlayerList:
         else:
             return None
 
-    def addPlayer(self, player):
+    def add_player(self, player):
         """
         Add a player to the list.
 
@@ -180,7 +180,7 @@ class PlayerSeries(PlayerList):
     def __str__(self):
         return self.name
 
-    def getStat(self, stat):
+    def get_stat(self, stat):
         """
         Get the total value of a given stat for the player in all matches.
 
@@ -191,14 +191,14 @@ class PlayerSeries(PlayerList):
         """
         statTotal = 0
         for match in self.players:
-            statValue = match.getStat(stat)
+            statValue = match.get_stat(stat)
             if statValue is None:
                 return None
             else:
                 statTotal += statValue
         return statTotal
     
-    def getStatAverage(self, stat):
+    def get_stat_average(self, stat):
         """
         Get the average value of a given stat for the player.
 
@@ -207,10 +207,10 @@ class PlayerSeries(PlayerList):
         RETURNS
             float - stat value, None if stat not found
         """
-        statTotal = self.getStat(stat)
+        statTotal = self.get_stat(stat)
         return statTotal / len(self.players) if statTotal is not None else None
 
-    def getStatPerEighty(self, stat):
+    def get_stat_per_eighty(self, stat):
         """
         Get the value of a given stat for the player, normalized for 80 mins.
 
@@ -221,14 +221,14 @@ class PlayerSeries(PlayerList):
         """
         sumStats = 0
         for match in self.players:
-            statValue = match.getStatPerEighty(stat)
+            statValue = match.get_stat_per_eighty(stat)
             if statValue is None:
                 return None
             else:
                 sumStats += statValue
         return sumStats / float(len(self.players))
 
-    def addPlayer(self, player):
+    def add_player(self, player):
         """
         Add a player to the list.
 

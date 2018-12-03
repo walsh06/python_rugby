@@ -36,9 +36,9 @@ class RugbyDB:
         """
         self.dbPath = os.path.join(CWD, "rugby_database")
         self.db = {}
-        self.loadDb()
+        self.load_db()
     
-    def loadDb(self):
+    def load_db(self):
         """
         Load the database into memory.
         """
@@ -49,7 +49,7 @@ class RugbyDB:
                 leagueDict = json.loads(dbContents)
                 self.db[os.path.splitext(db)[0]] = leagueDict
 
-    def _getMatchesDictList(self, ids, leagues=None, seasons=None):
+    def _get_matches_dict_list(self, ids, leagues=None, seasons=None):
         """
         Returns list of match dicts for the given parameters.
 
@@ -80,7 +80,7 @@ class RugbyDB:
                             return matches
         return matches
 
-    def getMatchById(self, id):
+    def get_match_by_id(self, id):
         """
         Get a match dictionary for a given id.
 
@@ -89,10 +89,10 @@ class RugbyDB:
         RETURNS:
             matchDict - match dictionary if found else None
         """
-        match = self._getMatchesDictList([id])
+        match = self._get_matches_dict_list([id])
         return match[0] if len(match) == 1 else None
 
-    def getMatchesForTeam(self, team, leagues=None, seasons=None):
+    def get_matches_for_team(self, team, leagues=None, seasons=None):
         """
         Return a list of match dictionaries for a given team name.
 
@@ -121,7 +121,7 @@ class RugbyDB:
                         matches[match_id] = match
         return matches
 
-    def getMatchesForLeague(self, league):
+    def get_matches_for_league(self, league):
         pass
 
 
@@ -136,7 +136,7 @@ class RugbyDBReadWrite(RugbyDB):
         if not os.path.exists(self.dbWritePath):
             os.makedirs(self.dbWritePath)
 
-    def writeDbFile(self, league):
+    def _write_file(self, league):
         """
         Write a league database file out.
 
@@ -151,16 +151,17 @@ class RugbyDBReadWrite(RugbyDB):
             print(e)
             print("Failed to update Database")
 
-    def writeMatchDb(self):
+    def write_db(self):
         """
         Write the full database to file.
         """
         for league in self.db:
-            self.writeDbFile(league)
+            self._write_file(league)
 
-    def addToDb(self, league_id, year, game_id, match_str):
+    def add_to_db(self, league_id, year, game_id, match_str):
         """
-        Add a new match to the database
+        Add a new match to the database.
+
         ARGS:
             league_id (str) - id of the league of the match
             year (str) - year/season string of the match
@@ -181,7 +182,7 @@ class RugbyDBReadWrite(RugbyDB):
         if year not in self.db[league_id]:
             self.db[league_id][year] = {}
         self.db[league_id][year][game_id] = matchDict
-        self.writeDbFile(league_id)
+        self._write_file(league_id)
         game = matchDict['gamePackage']['gameStrip']
         homeTeam = game['teams']['home']
         awayTeam = game['teams']['away']
@@ -189,7 +190,7 @@ class RugbyDBReadWrite(RugbyDB):
         print("Added: {} v {} - {}".format(homeTeam['name'], awayTeam['name'], date))
         return True
     
-    def updateDbFromWeb(self, league_id, year, force=False):
+    def update_from_web(self, league_id, year, force=False):
         """
         Update the database for a league by pulling stats from the internet.
 
@@ -204,6 +205,7 @@ class RugbyDBReadWrite(RugbyDB):
                     or league_id not in self.db
                     or year not in self.db[league_id]
                     or str(match_id) not in self.db[league_id][year])):
+                success = False
                 url = self.BASE_URL.format(game=match_id, league=league_id)
                 response = requests.get(url)
                 matchStr = ''
@@ -212,7 +214,7 @@ class RugbyDBReadWrite(RugbyDB):
                         matchStr = MATCH_RE.sub(r' ', line)
                         break
                 if matchStr:
-                    success = self.addToDb(league_id, year, match_id, matchStr)
+                    success = self.add_to_db(league_id, year, match_id, matchStr)
                 else:
                     print("Failed to get match dict from {}".format(url))
-                    return False
+                return success

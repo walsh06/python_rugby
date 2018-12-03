@@ -1,7 +1,7 @@
 class MatchEvent:
 
     @classmethod
-    def fromMatchEventDict(cls, match_event_dict):
+    def from_dict(cls, match_event_dict):
         """
         Create a Match Event from the dictionary in a Match.
 
@@ -58,59 +58,59 @@ class MatchEvent:
         String representation for a Match Event.
         """
         score = ", {}-{}".format(self.homeScore, self.awayScore) if self.homeScore else ""
-        return "{}: {}, {} {}".format(self.time, self.typeString, self.text, score)
+        return "{}: {}, {} {}".format(self.time, self.type_string, self.text, score)
 
     @property
-    def typeString(self):
+    def type_string(self):
         """
         Return the string name for a match event type.
         """
         return self.typeStrings[self.type] if self.type in self.typeStrings else self.type
 
-    def isTry(self):
+    def is_try(self):
         return self.type == 1
 
-    def isConversion(self):
+    def is_conversion(self):
         return self.type == 2
 
-    def isPenalty(self):
+    def is_penalty(self):
         return self.type == 3
 
-    def isDropGoal(self):
+    def is_drop_goal(self):
         return self.type == 4
 
-    def isYellowCard(self):
+    def is_yellow_card(self):
         return self.type == 5
 
-    def isRedCard(self):
+    def is_red_card(self):
         return self.type == 6
 
-    def isSubOff(self):
+    def is_sub_off(self):
         return self.type == 7
 
-    def isSubOn(self):
+    def is_sub_on(self):
         return self.type == 8
 
-    def isStartOfGame(self):
+    def is_start_of_game(self):
         return self.type == 9
 
-    def isEndOfFirstHalf(self):
+    def is_end_of_first_half(self):
         return self.type == 10
 
-    def isStartOfSecondHalf(self):
+    def is_start_of_second_half(self):
         return self.type == 11
 
-    def isEndOfGame(self):
+    def is_end_of_game(self):
         return self.type == 12
 
-    def isTextEvent(self):
+    def is_text_event(self):
         return self.type == 9999
 
 
 class MatchEventList:
 
     @classmethod
-    def fromPlayerEventDict(cls, player_event_dict):
+    def from_dict(cls, player_event_dict):
         """
         Create a Match Event list for a player events in a match.
 
@@ -163,7 +163,7 @@ class MatchEventList:
             self.currentIndex += 1
             return self.matchEvents[self.currentIndex]
 
-    def addMatchEvent(self, match_event):
+    def add_match_event(self, match_event):
         """
         Add a new match event to the list.
 
@@ -172,7 +172,7 @@ class MatchEventList:
         """
         self.matchEvents.append(match_event)
 
-    def getAllEventsForType(self, type_):
+    def get_events_for_type(self, type_):
         """
         Return a new MatchEventList filtered by type.
         
@@ -184,5 +184,5 @@ class MatchEventList:
         matchEvents = MatchEventList()
         for matchEvent in self.matchEvents:
             if matchEvent.type == type_:
-                matchEvents.addMatchEvent(matchEvent)
+                matchEvents.add_match_event(matchEvent)
         return matchEvents

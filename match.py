@@ -11,7 +11,7 @@ class MatchList:
     """
 
     @classmethod
-    def createMatchListForTeam(cls, team_name, leagues=None, seasons=None):
+    def create_for_team(cls, team_name, leagues=None, seasons=None):
         """
         Create a match list for a specific team, filter by league or seasons.
 
@@ -23,13 +23,13 @@ class MatchList:
             MatchList - MatchList object
         """
         db = CachedDB()
-        match_ids = db.getMatchesForTeam(team_name.lower(),
-                                         leagues=leagues,
-                                         seasons=seasons)
+        match_ids = db.get_matches_for_team(team_name.lower(),
+                                            leagues=leagues,
+                                            seasons=seasons)
         return cls(match_ids)
 
     @classmethod
-    def createMatchListForLeague(cls, league_id):
+    def create_for_league(cls, league_id):
         pass
 
     def __init__(self, match_ids):
@@ -41,7 +41,7 @@ class MatchList:
         self._teams = None
         db = CachedDB()
         for id_ in match_ids:
-            newMatch = Match.fromMatchId(id_)
+            newMatch = Match.from_match_id(id_)
             if newMatch is not None:
                 self._matches[id_] = newMatch
     
@@ -62,14 +62,14 @@ class MatchList:
         Override add operator to add two matchlists together.
         """
         for match_id in another_list.matches:
-            self.addMatch(match_id, another_list.matches[match_id])
+            self.add_match(match_id, another_list.matches[match_id])
         return self
 
     @property
     def matches(self):
         return self._matches
 
-    def getMatchIds(self):
+    def get_match_ids(self):
         """
         Return all match ids in the MatchList.
 
@@ -78,7 +78,7 @@ class MatchList:
         """
         return sorted(self._matches)
 
-    def getAllTeams(self):
+    def get_all_teams(self):
         """
         Return list of teams that play in the MatchListю
 
@@ -105,14 +105,14 @@ class MatchList:
         RETURNS:
             Match (obj) - returns next match object in list
         """
-        matchIds = self.getMatchIds()
+        matchIds = self.get_match_ids()
         if self.currentMatchIndex >= len(matchIds) - 1:
             raise StopIteration
         else:
             self.currentMatchIndex += 1
             return self._matches[matchIds[self.currentMatchIndex]]
     
-    def addMatch(self, id, match):
+    def add_match(self, id, match):
         """
         Add a new match to the matchlist.
 
@@ -122,9 +122,9 @@ class MatchList:
         """
         self._matches[id] = match
 
-    def getMatchesInDateRange(self,
-                              start_date=datetime.min,
-                              end_date=datetime.max):
+    def get_matches_in_range(self,
+                             start_date=datetime.min,
+                             end_date=datetime.max):
         """
         Filter MatchList for a given date range, returns a new MatchList.
 
@@ -137,7 +137,7 @@ class MatchList:
         matches = MatchList(match_ids=[])
         for id_, match in self._matches.items():
             if end_date > match.date > start_date:
-                matches.addMatch(id_, match)
+                matches.add_match(id_, match)
         return matches
 
 
@@ -155,7 +155,7 @@ class MatchListLite(MatchList):
         """
         self._matches = {el: None for el in match_ids}
 
-    def getAllTeams(self):
+    def get_all_teams(self):
         """
         Returns an empty list as MatchListLite doesn't have access to Match data.
 
@@ -171,14 +171,14 @@ class MatchListLite(MatchList):
         RETURNS:
             int - returns next match id in list
         """
-        matchIds = self.getMatchIds()
+        matchIds = self.get_match_ids()
         if self.currentMatchIndex >= len(matchIds) - 1:
             raise StopIteration
         else:
             self.currentMatchIndex += 1
             return matchIds[self.currentMatchIndex]
 
-    def getMatchesInDateRange(self, start_date=None, end_date=None):
+    def get_matches_in_range(self, start_date=None, end_date=None):
         """
         Not implemented for MatchListLite.
 
@@ -194,7 +194,7 @@ class MatchListLite(MatchList):
 class Match:
 
     @classmethod
-    def fromMatchId(cls, match_id):
+    def from_match_id(cls, match_id):
         """
         Create a Match object from match id.
 
@@ -203,7 +203,7 @@ class Match:
         RETURNS
             Match (obj) - Match object
         """
-        matchDict = CachedDB().getMatchById(match_id)
+        matchDict = CachedDB().get_match_by_id(match_id)
         return cls(matchDict) if matchDict else None
 
     def __init__(self, match_dict):
@@ -328,7 +328,7 @@ class Match:
                 }
             
             for event in matchEvents:
-                self.matchEventList.addMatchEvent(MatchEvent.fromMatchEventDict(event))
+                self.matchEventList.add_match_event(MatchEvent.from_dict(event))
             
             self.players[self.homeTeam['name']] = PlayerList(
                 players['home']['team'] + players['home']['reserves'],
@@ -350,7 +350,7 @@ class Match:
                                      self.awayTeam['name'].capitalize(),
                                      self.date)
 
-    def getAllStatHeaders(self):
+    def get_stat_headers(self):
         """
         Return all possibles stats for the match.
 
@@ -359,7 +359,7 @@ class Match:
         """
         return sorted(self.matchStats)
 
-    def getHomeAwayValue(self, team):
+    def get_home_away_value(self, team):
         """
         Return homeValue or awayValue depending on whether the team is home or away.
 
@@ -374,7 +374,7 @@ class Match:
             return 'awayValue'
         return None
 
-    def isTeamPlaying(self, team):
+    def is_team_playing(self, team):
         """
         Check if a given team is playing in this match.
 
@@ -384,9 +384,9 @@ class Match:
             bool - True = team is playing in the match
                    False = team is not playing in the match
         """
-        return bool(self.getHomeAwayValue(team))
+        return bool(self.get_home_away_value(team))
 
-    def getOpposition(self, team):
+    def get_opposition(self, team):
         """
         Get the team name of the opposition to the team provided.
 
@@ -402,7 +402,7 @@ class Match:
             return self.homeTeam['name']
         return None
     
-    def getStatForOpposition(self, team, stat):
+    def get_stat_for_opposition(self, team, stat):
         """
         Get the stat for the opposition of the team provided.
 
@@ -412,9 +412,9 @@ class Match:
         RETURNS:
             float - value of the stat or None if not found
         """
-        return self.getStatForTeam(self.getOpposition(team), stat)
+        return self.get_stat_for_team(self.get_opposition(team), stat)
 
-    def getStatForTeam(self, team, stat):
+    def get_stat_for_team(self, team, stat):
         """
         Return a stats value for a given team if they played in the match.
         ARGS:
@@ -424,11 +424,11 @@ class Match:
             float - value for stat or None if not found
         """
         if stat.lower() in self.matchStats:
-            value = self.getHomeAwayValue(team)
+            value = self.get_home_away_value(team)
             return self.matchStats[stat.lower()][value] if value is not None else None
         return None
 
-    def isPlayerInGame(self, player_name):
+    def is_player_in_game(self, player_name):
         """
         Check if a player is playing in the match.
 
@@ -444,7 +444,7 @@ class Match:
                     return True, team
         return False, None
 
-    def getPlayer(self, player_name, team=None):
+    def get_player(self, player_name, team=None):
         """
         Get a player object from the match.
 

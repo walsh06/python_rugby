@@ -2,7 +2,7 @@ from match import MatchList
 from league import League
 
 
-def getAveragePointsScored(team, seasons=None):
+def get_average_points(team, seasons=None):
     """
     Get average points scored by a team, limit it by season.
 
@@ -12,10 +12,10 @@ def getAveragePointsScored(team, seasons=None):
     RETURNS:
         float - average points scored
     """
-    return getAverageStatForTeam('points', team, seasons)
+    return get_average_stat_for_team('points', team, seasons)
 
 
-def getAverageStatForTeam(stat, team, seasons=None):
+def get_average_stat_for_team(stat, team, seasons=None):
     """
     Get average of a stat for a team, limit it by season.
 
@@ -26,15 +26,15 @@ def getAverageStatForTeam(stat, team, seasons=None):
     RETURNS:
         float - average of stats
     """
-    matchList = MatchList.createMatchListForTeam(team, seasons=seasons)
+    matchList = MatchList.create_for_team(team, seasons=seasons)
     matches, statTotal = 0, 0
     for match in matchList:
-        statTotal += match.getStatForTeam(team, stat)
+        statTotal += match.get_stat_for_team(team, stat)
         matches += 1
     return statTotal / matches
 
 
-def getPlayerStatInMatches(match_list, stat):
+def get_players_stats(match_list, stat):
     """
     Get a list of all players in the list of matches
     and their total for the stat in each match.
@@ -50,11 +50,11 @@ def getPlayerStatInMatches(match_list, stat):
     for match in match_list:
         for team in match.players:
             for player in match.players[team]:
-                playerStats.append((player.name, team, player.getStat(stat)))
+                playerStats.append((player.name, team, player.get_stat(stat)))
     return sorted(playerStats, key=lambda tup: tup[2], reverse=True)
 
 
-def getTeamStatInMatches(match_list, stat):
+def get_teams_stats(match_list, stat):
     """
     Get a list of all teams in the list of matches
     and their total for the stat in each match.
@@ -67,13 +67,13 @@ def getTeamStatInMatches(match_list, stat):
                           (teamName, statValue)
     """
     teamStats = [
-        (team, match.getStatForTeam(team, stat))
+        (team, match.get_stat_for_team(team, stat))
         for match in match_list for team in match.players
     ]
     return sorted(teamStats, key=lambda tup: tup[1], reverse=True)
 
 
-def getLeagueLeadersForStatTotal(league_name, season, stat):
+def get_league_leaders_for_stat(league_name, season, stat):
     """
     Get the league leaders for a given stat in a season.
 
@@ -86,14 +86,14 @@ def getLeagueLeadersForStatTotal(league_name, season, stat):
                                (playerName, teamName, statValue)
     """
     leagueLeadersDict = {}
-    league = League.fromLeagueName(league_name)
+    league = League.from_league_name(league_name)
     if league is not None:
         seasonMatchList = league._matches[season]
         for match in seasonMatchList:
             for team in match.players:
                 for player in match.players[team]:
                     if player.id in leagueLeadersDict:
-                        leagueLeadersDict[player.id][2] += player.getStat(stat)
+                        leagueLeadersDict[player.id][2] += player.get_stat(stat)
                     else:
-                        leagueLeadersDict[player.id] = [player.name, team, player.getStat(stat)]
+                        leagueLeadersDict[player.id] = [player.name, team, player.get_stat(stat)]
     return sorted(leagueLeadersDict.values(), key=lambda tup: tup[2], reverse=True)

@@ -30,7 +30,7 @@ class LeagueList:  # TODO: rename to LeagueDict
             self._leagues[league_id] = instance
             self._league_names[league['name'].lower()] = league_id
 
-    def getLeagueByName(self, league_name):
+    def get_by_name(self, league_name):
         """
         Return a league from the list by the league name.
 
@@ -42,7 +42,7 @@ class LeagueList:  # TODO: rename to LeagueDict
         if league_name.lower() in self._league_names:
             return self._leagues.get(self._league_names[league_name.lower()])
 
-    def getLeagueById(self, league_id):
+    def get_by_id(self, league_id):
         """
         Return a league from the list by the league id.
 
@@ -64,7 +64,7 @@ class League:
     """
 
     @classmethod
-    def fromLeagueName(cls, name, init_matches=True):
+    def from_league_name(cls, name, init_matches=True):
         """
         Create a League with the league name, returns None if league name not found.
 
@@ -95,9 +95,9 @@ class League:
         self._matches = {}
         if not match_dict:
             match_dict = MATCH_IDS[self.id]['matchIds']
-        self.loadMatches(match_dict, init_matches)
+        self.load_matches(match_dict, init_matches)
 
-    def loadMatches(self, match_dict, full=False):
+    def load_matches(self, match_dict, full=False):
         """
         Load match dictionary for the league where each key is a season and each item is a MatchList
 
@@ -112,7 +112,7 @@ class League:
         for season in match_dict:
             self._matches[season] = match_list_class(match_dict[season])
 
-    def _getSeasonList(self, season=None):
+    def _get_season_ids(self, season=None):
         """
         Internal function to return a list with only single season id
         or return all seasons.
@@ -127,7 +127,7 @@ class League:
 
         return sorted(self._matches)
     
-    def getMatchIds(self, season=None):
+    def get_match_ids(self, season=None):
         """
         Return a list of match ids for the league, either for a specific season or all seasons
 
@@ -137,11 +137,11 @@ class League:
             [str] - list of match ids
         """
         matchIdList = []
-        for s_id in self._getSeasonList(season):
-            matchIdList.extend(self._matches[s_id].getMatchIds())
+        for s_id in self._get_season_ids(season):
+            matchIdList.extend(self._matches[s_id].get_match_ids())
         return matchIdList
 
-    def containsTeam(self, team, season=None):
+    def contains_team(self, team, season=None):
         """
         Check if a team plays in a league.
 
@@ -152,13 +152,13 @@ class League:
             bool - True if team is in the league, False if team is not in the league
         """
         teams = set()
-        for s_id in self._getSeasonList(season):
-            teams |= set(self._matches[s_id].getAllTeams())
+        for s_id in self._get_season_ids(season):
+            teams |= set(self._matches[s_id].get_all_teams())
         return team.lower() in teams
 
-    def getMatchesInDateRange(self,
-                              start_date=datetime.min,
-                              end_date=datetime.max):
+    def get_matches_in_range(self,
+                             start_date=datetime.min,
+                             end_date=datetime.max):
         """
         Filter matches in the league for a given date range, returns a new MatchList.
 
@@ -169,6 +169,6 @@ class League:
             MatchList (obj) - return new MatchList object with matches in date range
         """
         merged_match_list = MatchList(match_ids=[])
-        for season in self._getSeasonList():
-            merged_match_list += self._matches[season].getMatchesInDateRange(start_date, end_date)
+        for season_id in self._get_season_ids():
+            merged_match_list += self._matches[season_id].get_matches_in_range(start_date, end_date)
         return merged_match_list
