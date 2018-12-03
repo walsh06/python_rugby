@@ -181,8 +181,8 @@ class MatchEventList:
         RETURNS:
             MatchEventList - list with filtered MatchEvents
         """
-        matchEvents = MatchEventList()
-        for matchEvent in self.matchEvents:
-            if matchEvent.type == type_:
-                matchEvents.add_match_event(matchEvent)
-        return matchEvents
+        match_events = MatchEventList()
+        for match_event in self.matchEvents:
+            if match_event.type == type_:
+                match_events.add_match_event(match_event)
+        return match_events

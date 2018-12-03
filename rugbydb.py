@@ -45,9 +45,9 @@ class RugbyDB:
         for db in os.listdir(self.dbPath):
             if "backup" not in db:
                 with open(os.path.join(self.dbPath, db)) as dbFile:
-                    dbContents = dbFile.read()
-                leagueDict = json.loads(dbContents)
-                self.db[os.path.splitext(db)[0]] = leagueDict
+                    db_contents = dbFile.read()
+                league_dict = json.loads(db_contents)
+                self.db[os.path.splitext(db)[0]] = league_dict
 
     def _get_matches_dict_list(self, ids, leagues=None, seasons=None):
         """
@@ -66,11 +66,11 @@ class RugbyDB:
             leagues = list(self.db)
         for league in leagues:
             if not seasons:
-                yearList = self.db[league]
+                year_list = self.db[league]
             else:
-                yearList = seasons
+                year_list = seasons
 
-            for year in yearList:
+            for year in year_list:
                 if year in self.db[league]:
                     for match in self.db[league][year]:
                         if match in ids:
@@ -107,17 +107,16 @@ class RugbyDB:
         if not leagues:
             leagues = list(self.db)
         for league in leagues:
+            year_list = self.db[league].keys()
             if seasons:
-                yearList = self.db[league].keys() | set(seasons)
-            else:
-                yearList = self.db[league].keys()
+                year_list |= set(seasons)
 
-            for year in yearList:
+            for year in year_list:
                 for match_id, match in self.db[league][year].items():
                     teams_dict = match['gamePackage']['gameStrip']['teams']
-                    homeTeam = teams_dict['home']['name'].lower()
-                    awayTeam = teams_dict['away']['name'].lower()
-                    if team.lower() in {homeTeam, awayTeam}:
+                    home_team = teams_dict['home']['name'].lower()
+                    away_team = teams_dict['away']['name'].lower()
+                    if team.lower() in {home_team, away_team}:
                         matches[match_id] = match
         return matches
 
@@ -143,10 +142,10 @@ class RugbyDBReadWrite(RugbyDB):
         ARGS:
             league (int) - league id to write file
         """
-        dbPath = os.path.join(self.dbWritePath, "{}.db".format(league))
+        db_path = os.path.join(self.dbWritePath, "{}.db".format(league))
         try:
-            with open(dbPath, "w") as dbFile:
-                dbFile.write(json.dumps(self.db[league], indent=4, sort_keys=True))
+            with open(db_path, "w") as db_file:
+                db_file.write(json.dumps(self.db[league], indent=4, sort_keys=True))
         except Exception as e:
             print(e)
             print("Failed to update Database")
@@ -172,7 +171,7 @@ class RugbyDBReadWrite(RugbyDB):
         """
         match_str = match_str[:-1].replace('          window.__INITIAL_STATE__ = ', '')
         try:
-            matchDict = json.loads(match_str)
+            match_dict = json.loads(match_str)
         except:
             print(("Error getting game online - game id: {}, league id: {}".format(game_id, league_id)))
             print(match_str)
@@ -181,13 +180,13 @@ class RugbyDBReadWrite(RugbyDB):
             self.db[league_id] = {}
         if year not in self.db[league_id]:
             self.db[league_id][year] = {}
-        self.db[league_id][year][game_id] = matchDict
+        self.db[league_id][year][game_id] = match_dict
         self._write_file(league_id)
-        game = matchDict['gamePackage']['gameStrip']
-        homeTeam = game['teams']['home']
-        awayTeam = game['teams']['away']
+        game = match_dict['gamePackage']['gameStrip']
+        home_team = game['teams']['home']
+        away_team = game['teams']['away']
         date = game['isoDate']
-        print("Added: {} v {} - {}".format(homeTeam['name'], awayTeam['name'], date))
+        print("Added: {} v {} - {}".format(home_team['name'], away_team['name'], date))
         return True
     
     def update_from_web(self, league_id, year, force=False):
@@ -208,13 +207,13 @@ class RugbyDBReadWrite(RugbyDB):
                 success = False
                 url = self.BASE_URL.format(game=match_id, league=league_id)
                 response = requests.get(url)
-                matchStr = ''
+                match_str = ''
                 for line in response.text.splitlines():
                     if 'window.__INITIAL_STATE__ =' in line:
-                        matchStr = MATCH_RE.sub(r' ', line)
+                        match_str = MATCH_RE.sub(r' ', line)
                         break
-                if matchStr:
-                    success = self.add_to_db(league_id, year, match_id, matchStr)
+                if match_str:
+                    success = self.add_to_db(league_id, year, match_id, match_str)
                 else:
                     print("Failed to get match dict from {}".format(url))
                 return success

@@ -6,6 +6,12 @@ from match import MatchList, Match
 from rugbydb import RugbyDB
 from matchevent import MatchEvent, MatchEventList
 
+SEXTON_CONV = {'homeScore': 0, 'awayScore': 7, 'time': "12'", 'type': 2,
+                   'text': 'Conversion - Johnny Sexton , Ireland', }
+
+ZEBO_TRY = {'homeScore': 0, 'awayScore': 5, 'time': "11'", 'type': 1,
+                       'text': 'Try - Simon Zebo , Ireland', }
+
 
 class Timer:
 
@@ -40,40 +46,40 @@ def check_result(test_name, func, args, expected):
 
 
 def test_league():
-    l = League(
+    league = League(
         1234, 'leagueOne', {
             '1718': [5, 6, 7, 8],
             '1819': [1, 2, 3, 4],
         }, False)
 
     check_result("League - All Match ids",
-                 l.get_match_ids,
+                 league.get_match_ids,
                  [],
                  [5, 6, 7, 8, 1, 2, 3, 4])
     check_result("League - Season Match ids",
-                 l.get_match_ids,
+                 league.get_match_ids,
                  ['1819'],
                  [1, 2, 3, 4])
 
     with Timer('League Load') as t:
-        l = League('180659', 'Six Nations', init_matches=True)
-    startDate = datetime.datetime(2018, 3, 16)
-    endDate = datetime.datetime(2018, 3, 18)
-    filteredLeagueMatches = l.get_matches_in_range(startDate, endDate)
-    check_result('League - Test date range', len, [filteredLeagueMatches], 3)
+        league = League('180659', 'Six Nations', init_matches=True)
+    start_date = datetime.datetime(2018, 3, 16)
+    end_date = datetime.datetime(2018, 3, 18)
+    filtered_matches = league.get_matches_in_range(start_date, end_date)
+    check_result('League - Test date range', len, [filtered_matches], 3)
 
-    l = League.from_league_name('Six Nations', init_matches=False)
-    assert l.id == '180659', 'League - Test from_league_name failed'
+    league = League.from_league_name('Six Nations', init_matches=False)
+    assert league.id == '180659', 'League - Test from_league_name failed'
 
 
 def test_match_list():
     with Timer('Create Match List for Team'):
-        matchList = MatchList.create_for_team('munster')
+        match_list = MatchList.create_for_team('munster')
     
-    startDate = datetime.datetime(2018, 10, 12)
-    endDate = datetime.datetime(2018, 10, 15)
-    filteredMatchList = matchList.get_matches_in_range(startDate, endDate)
-    check_result('MatchList - Test date range', len, [filteredMatchList], 1)
+    start_date = datetime.datetime(2018, 10, 12)
+    end_date = datetime.datetime(2018, 10, 15)
+    filtered_list = match_list.get_matches_in_range(start_date, end_date)
+    check_result('MatchList - Test date range', len, [filtered_list], 1)
 
 
 def test_match():
@@ -90,36 +96,21 @@ def test_match():
 
 
 def test_match_event():
-    testEvent = {'homeScore': 0, 'awayScore': 5, 'time': "11'", 'type': 1, 'text': 'Try - Simon Zebo , Ireland'}
-    testEvent = MatchEvent.from_dict(testEvent)
-    check_result("Match Event - test is try", testEvent.is_try, [], True)
-    check_result("Match Event - test is not conversion", testEvent.is_conversion, [], False)
-    assert testEvent.type_string == 'Try', "Match Event - test type string failed"
+    test_event = ZEBO_TRY
+    test_event = MatchEvent.from_dict(test_event)
+    check_result("Match Event - test is try", test_event.is_try, [], True)
+    check_result("Match Event - test is not conversion", test_event.is_conversion, [], False)
+    assert test_event.type_string == 'Try', "Match Event - test type string failed"
 
 
 def test_match_event_list():
-    testEvents = [
-        {
-            'homeScore': 0,
-            'awayScore': 5,
-            'time': "11'",
-            'type': 1,
-            'text': 'Try - Simon Zebo , Ireland',
-        },
-        {
-            'homeScore': 0,
-            'awayScore': 7,
-            'time': "12'",
-            'type': 2,
-            'text': 'Conversion - Johnny Sexton , Ireland',
-        },
-    ]
-    matchEventList = MatchEventList([
-        MatchEvent.from_dict(testEvents[0]),
-        MatchEvent.from_dict(testEvents[1]),
+    test_events = [ZEBO_TRY, SEXTON_CONV]
+    match_event_list = MatchEventList([
+        MatchEvent.from_dict(test_events[0]),
+        MatchEvent.from_dict(test_events[1]),
     ])
-    tryList = matchEventList.get_events_for_type(1)
-    check_result('Match Event List - test filter by type', len, [tryList], 1)
+    try_list = match_event_list.get_events_for_type(1)
+    check_result('Match Event List - test filter by type', len, [try_list], 1)
 
 
 def test_player():

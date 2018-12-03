@@ -41,9 +41,9 @@ class MatchList:
         self._teams = None
         db = CachedDB()
         for id_ in match_ids:
-            newMatch = Match.from_match_id(id_)
-            if newMatch is not None:
-                self._matches[id_] = newMatch
+            new_match = Match.from_match_id(id_)
+            if new_match is not None:
+                self._matches[id_] = new_match
     
     def __str__(self):
         """
@@ -105,12 +105,12 @@ class MatchList:
         RETURNS:
             Match (obj) - returns next match object in list
         """
-        matchIds = self.get_match_ids()
-        if self.currentMatchIndex >= len(matchIds) - 1:
+        match_ids = self.get_match_ids()
+        if self.currentMatchIndex >= len(match_ids) - 1:
             raise StopIteration
         else:
             self.currentMatchIndex += 1
-            return self._matches[matchIds[self.currentMatchIndex]]
+            return self._matches[match_ids[self.currentMatchIndex]]
     
     def add_match(self, id, match):
         """
@@ -171,12 +171,12 @@ class MatchListLite(MatchList):
         RETURNS:
             int - returns next match id in list
         """
-        matchIds = self.get_match_ids()
-        if self.currentMatchIndex >= len(matchIds) - 1:
+        match_ids = self.get_match_ids()
+        if self.currentMatchIndex >= len(match_ids) - 1:
             raise StopIteration
         else:
             self.currentMatchIndex += 1
-            return matchIds[self.currentMatchIndex]
+            return match_ids[self.currentMatchIndex]
 
     def get_matches_in_range(self, start_date=None, end_date=None):
         """
@@ -203,8 +203,8 @@ class Match:
         RETURNS
             Match (obj) - Match object
         """
-        matchDict = CachedDB().get_match_by_id(match_id)
-        return cls(matchDict) if matchDict else None
+        match_dict = CachedDB().get_match_by_id(match_id)
+        return cls(match_dict) if match_dict else None
 
     def __init__(self, match_dict):
         """
@@ -212,59 +212,59 @@ class Match:
             match_dict (dict) - dictionary storing match information from database
         """
         game = match_dict['gamePackage']
-        homeTeam = game['gameStrip']['teams']['home']
-        awayTeam = game['gameStrip']['teams']['away']
+        home_team = game['gameStrip']['teams']['home']
+        away_team = game['gameStrip']['teams']['away']
         date = game['gameStrip']['isoDate']
-        dataVis = game['matchStats']['dataVis']
+        data_vis = game['matchStats']['dataVis']
         table = game['matchStats']['table']
         scores = game['matchEvents']['col'][0][0]['data']
         attacking = game['matchEvents']['col'][1][1]['data']
         discipline = game['matchDiscipline']['col'][1][0]['data']
         penalties = game['matchDiscipline']['col'][0][0]['data']
-        matchAttacking = game['matchAttacking']['col'][1][0]['data']
-        matchDefending = game['matchDefending']['col'][0]
+        match_attacking = game['matchAttacking']['col'][1][0]['data']
+        match_defending = game['matchDefending']['col'][0]
         players = game['matchLineUp']
-        matchEvents = game['matchCommentary']['events']
+        match_events = game['matchCommentary']['events']
 
         self.matchStats = {}
         self.players = {}
         self.matchEventList = MatchEventList([])
 
         try:
-            dateParts = date[:10].split('-')
-            timeParts = date[11:-1].split(':')
-            self.date = datetime(int(dateParts[0]),
-                                 int(dateParts[1]),
-                                 int(dateParts[2]),
-                                 int(timeParts[0]),
-                                 int(timeParts[1]))
+            date_parts = date[:10].split('-')
+            time_parts = date[11:-1].split(':')
+            self.date = datetime(int(date_parts[0]),
+                                 int(date_parts[1]),
+                                 int(date_parts[2]),
+                                 int(time_parts[0]),
+                                 int(time_parts[1]))
             self.homeTeam = {
-                'name': homeTeam['name'].lower(),
-                'abbrev': homeTeam['abbrev'],
-                'score': homeTeam['score'],
+                'name': home_team['name'].lower(),
+                'abbrev': home_team['abbrev'],
+                'score': home_team['score'],
             }
             self.awayTeam = {
-                'name': awayTeam['name'].lower(),
-                'abbrev': awayTeam['abbrev'],
-                'score': awayTeam['score'],
+                'name': away_team['name'].lower(),
+                'abbrev': away_team['abbrev'],
+                'score': away_team['score'],
             }
             self.matchStats = {
                 'points': {
-                    'homeValue': float(homeTeam['score']),
-                    'awayValue': float(awayTeam['score']),
+                    'homeValue': float(home_team['score']),
+                    'awayValue': float(away_team['score']),
                 }
             }
 
-            for item in dataVis + table + discipline + scores + attacking:
+            for item in data_vis + table + discipline + scores + attacking:
                 try:
-                    homeValue = float(item['homeValue'])
-                    awayValue = float(item['awayValue'])
+                    home_value = float(item['homeValue'])
+                    away_value = float(item['awayValue'])
                 except:
-                    homeValue = float(item['homeValue'][:-1])
-                    awayValue = float(item['awayValue'][:-1])
+                    home_value = float(item['homeValue'][:-1])
+                    away_value = float(item['awayValue'][:-1])
                 self.matchStats[item['text'].lower()] = {
-                    'homeValue': homeValue,
-                    'awayValue': awayValue,
+                    'homeValue': home_value,
+                    'awayValue': away_value,
                 }
             self.matchStats['penalties conceded'] = {
                 'homeValue': float(penalties['homeTotal']),
@@ -275,59 +275,59 @@ class Match:
             for value in ('homeValue', 'awayValue'):
                 self.matchStats['tackles'][value] = self.matchStats['tackles'][value] - self.matchStats['missed tackles'][value]
             
-            for stat in matchAttacking:
+            for stat in match_attacking:
                 if "/" in stat['homeValue']:
                     if "Won" in stat['text']:
-                        statName = stat['text'].split(' ')[0].lower()
-                        homeStat = stat['homeValue'].split(' ')
-                        awayStat = stat['awayValue'].split(' ') 
-                        self.matchStats["{} won".format(statName)] = {
-                            'homeValue': homeStat[0],
-                            'awayValue': awayStat[0],
+                        stat_name = stat['text'].split(' ')[0].lower()
+                        home_stat = stat['homeValue'].split(' ')
+                        away_stat = stat['awayValue'].split(' ')
+                        self.matchStats["{} won".format(stat_name)] = {
+                            'homeValue': home_stat[0],
+                            'awayValue': away_stat[0],
                         }
-                        self.matchStats["{} total".format(statName)] = {
-                            'homeValue': homeStat[2],
-                            'awayValue': awayStat[2],
+                        self.matchStats["{} total".format(stat_name)] = {
+                            'homeValue': home_stat[2],
+                            'awayValue': away_stat[2],
                         }
                     else:
-                        statName = stat['text'].split(' ')[0].lower()
-                        statSubText = stat['text'].split(' ')[1].split('/')
+                        stat_name = stat['text'].split(' ')[0].lower()
+                        stat_sub_text = stat['text'].split(' ')[1].split('/')
 
-                        homeStat = stat['homeValue'].split(' / ')
-                        awayStat = stat['awayValue'].split(' / ') 
-                        self.matchStats["{} {}".format(statName, statSubText[0].lower())] = {
-                            'homeValue': homeStat[0][:-1],
-                            'awayValue': awayStat[0][:-1],
+                        home_stat = stat['homeValue'].split(' / ')
+                        away_stat = stat['awayValue'].split(' / ')
+                        self.matchStats["{} {}".format(stat_name, stat_sub_text[0].lower())] = {
+                            'homeValue': home_stat[0][:-1],
+                            'awayValue': away_stat[0][:-1],
                         }
-                        self.matchStats["{} {}".format(statName, statSubText[1].lower())] = {
-                            'homeValue': homeStat[1][:-1],
-                            'awayValue': awayStat[1][:-1],
+                        self.matchStats["{} {}".format(stat_name, stat_sub_text[1].lower())] = {
+                            'homeValue': home_stat[1][:-1],
+                            'awayValue': away_stat[1][:-1],
                         }
                 else:
                     try:
-                        homeValue = float(stat['homeValue'])
-                        awayValue = float(stat['awayValue'])
+                        home_value = float(stat['homeValue'])
+                        away_value = float(stat['awayValue'])
                     except:
-                        homeValue = float(stat['homeValue'][:-1])
-                        awayValue = float(stat['awayValue'][:-1])
+                        home_value = float(stat['homeValue'][:-1])
+                        away_value = float(stat['awayValue'][:-1])
                     self.matchStats[stat['text'].lower()] = {
-                        'homeValue': homeValue,
-                        'awayValue': awayValue,
+                        'homeValue': home_value,
+                        'awayValue': away_value,
                     }
             
-            for stat in matchDefending:
-                setPiece = stat['data']
-                statName = setPiece['text'].split(' ')[0].lower()
-                self.matchStats["{} won".format(statName)] = {
-                    'homeValue': setPiece['homeWon'],
-                    'awayValue': setPiece['awayWon'],
+            for stat in match_defending:
+                set_piece = stat['data']
+                stat_name = set_piece['text'].split(' ')[0].lower()
+                self.matchStats["{} won".format(stat_name)] = {
+                    'homeValue': set_piece['homeWon'],
+                    'awayValue': set_piece['awayWon'],
                 }
-                self.matchStats["{} total".format(statName)] = {
-                    'homeValue': setPiece['homeTotal'],
-                    'awayValue': setPiece['awayTotal'],
+                self.matchStats["{} total".format(stat_name)] = {
+                    'homeValue': set_piece['homeTotal'],
+                    'awayValue': set_piece['awayTotal'],
                 }
             
-            for event in matchEvents:
+            for event in match_events:
                 self.matchEventList.add_match_event(MatchEvent.from_dict(event))
             
             self.players[self.homeTeam['name']] = PlayerList(

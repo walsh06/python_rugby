@@ -136,10 +136,10 @@ class League:
         RETURNS
             [str] - list of match ids
         """
-        matchIdList = []
+        match_id_list = []
         for s_id in self._get_season_ids(season):
-            matchIdList.extend(self._matches[s_id].get_match_ids())
-        return matchIdList
+            match_id_list.extend(self._matches[s_id].get_match_ids())
+        return match_id_list
 
     def contains_team(self, team, season=None):
         """

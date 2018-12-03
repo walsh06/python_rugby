@@ -25,26 +25,27 @@ class Player:
                 stat = player_dict[key]
                 self.matchStats[stat['name'].lower()] = float(stat['value'])
 
-        if 'missed tackles' in self.matchStats and self.matchStats['tackles'] >= self.matchStats['missed tackles']:
+        missed_tck = self.matchStats.get('missed tackles', 0)
+        if self.matchStats['tackles'] >= missed_tck:
             # adjust tackles to be completed tackles
-            self.matchStats['tackles'] = self.matchStats['tackles'] - self.matchStats['missed tackles']
+            self.matchStats['tackles'] -= missed_tck
         self.matchEvents = MatchEventList.from_dict(player_dict['eventTimes'])
         self.minutesPlayed = None
         if match_event_list is not None:
-            subEvents = []
+            sub_events = []
             for event in match_event_list:
                 if (event.type in {7, 8}) and self.name in event.text:
-                    subEvents.append((event.time, event.type))
-            subOnTime = 0
+                    sub_events.append((event.time, event.type))
+            sub_on_time = 0
             self.minutesPlayed = 0
-            for event in sorted(subEvents):
+            for event in sorted(sub_events):
                 if event[1] == 7:
-                    self.minutesPlayed += event[0] - subOnTime
-                    subOnTime = -1
+                    self.minutesPlayed += event[0] - sub_on_time
+                    sub_on_time = -1
                 elif event[1] == 8:
-                    subOnTime = event[0]
-            if not (int(self.number) > 15 and subOnTime == 0) and subOnTime != -1:
-                self.minutesPlayed += 80 - subOnTime  
+                    sub_on_time = event[0]
+            if not (int(self.number) > 15 and sub_on_time == 0) and sub_on_time != -1:
+                self.minutesPlayed += 80 - sub_on_time
 
     def __str__(self):
         return "{}: {}".format(self.number, self.name)
@@ -80,10 +81,10 @@ class Player:
         RETURNS
             float - stat value, None if stat not found
         """
-        statValue = self.get_stat(stat)
-        if statValue:
-            statValue = statValue * (80.0 / self.minutesPlayed)
-        return statValue
+        stat_value = self.get_stat(stat)
+        if stat_value:
+            stat_value = stat_value * (80.0 / self.minutesPlayed)
+        return stat_value
 
 
 class PlayerList:
@@ -171,9 +172,9 @@ class PlayerSeries(PlayerList):
                 msg = "Player Series must take a list of player dicts of the same player"
                 raise Exception(msg)
 
-            standardInfo = player_dict_list[0]
-            self.name = standardInfo['name']
-            self.id = standardInfo['id']
+            standard_info = player_dict_list[0]
+            self.name = standard_info['name']
+            self.id = standard_info['id']
 
         self.players = [Player(player_dict) for player_dict in player_dict_list]
 
@@ -189,14 +190,14 @@ class PlayerSeries(PlayerList):
         RETURNS
             float - stat value, None if stat not found
         """
-        statTotal = 0
+        stat_total = 0
         for match in self.players:
-            statValue = match.get_stat(stat)
-            if statValue is None:
+            stat_value = match.get_stat(stat)
+            if stat_value is None:
                 return None
             else:
-                statTotal += statValue
-        return statTotal
+                stat_total += stat_value
+        return stat_total
     
     def get_stat_average(self, stat):
         """
@@ -207,8 +208,8 @@ class PlayerSeries(PlayerList):
         RETURNS
             float - stat value, None if stat not found
         """
-        statTotal = self.get_stat(stat)
-        return statTotal / len(self.players) if statTotal is not None else None
+        stat_total = self.get_stat(stat)
+        return stat_total / len(self.players) if stat_total is not None else None
 
     def get_stat_per_eighty(self, stat):
         """
@@ -219,14 +220,14 @@ class PlayerSeries(PlayerList):
         RETURNS
             float - stat value per 80 mins, None if stat not found
         """
-        sumStats = 0
+        sum_stats = 0
         for match in self.players:
-            statValue = match.get_stat_per_eighty(stat)
-            if statValue is None:
+            stat_value = match.get_stat_per_eighty(stat)
+            if stat_value is None:
                 return None
             else:
-                sumStats += statValue
-        return sumStats / float(len(self.players))
+                sum_stats += stat_value
+        return sum_stats / float(len(self.players))
 
     def add_player(self, player):
         """

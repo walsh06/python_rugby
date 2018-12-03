@@ -17,8 +17,8 @@ championsCup = League.from_league_name('Champions Cup')
 
 # get matches in the range of dates
 # in this example these dates encompass Round 2 matches
-startDate = datetime(2018,10,18)
-endDate = datetime(2018,10,22)
+startDate = datetime(2018, 10, 18)
+endDate = datetime(2018, 10, 22)
 roundTwoMatches = championsCup.get_matches_in_range(startDate, endDate)
 
 # Get the number of tackles for each player
