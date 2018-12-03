@@ -3,103 +3,120 @@ from datetime import datetime
 from match import MatchList, MatchListLite
 from variables import MATCH_IDS
 
-class LeagueList():
+
+class LeagueList:  # TODO: rename to LeagueDict
     """
     Class to hold a collection of League objects that can be 
     accessed and manipulated
     """
 
-    def __init__(self, leagueDict):
+    def __init__(self, league_dict):
         """
         ARGS:
-            leagueDict (dict) - dictionary for a league to load up in the form
-                                {leagueId: {'name': 'leagueName', 'matchIds': {'season': [int(matchId), int(matchId)]}}}
+            league_dict (dict) - dictionary for a league to load up in the form
+            {
+              leagueId: {
+                'name': 'leagueName',
+                'matchIds': {
+                  'season': [int(matchId), int(matchId)]
+                }
+              }
+            }
         """
         self._leagues = {}
-        for league in leagueDict:
-            self._leagues[league] = League(league, leagueDict[league]['name'], leagueDict[league]['matchIds'])
+        self._league_names = {}
+        for league_id, league in league_dict.items():
+            instance = League(league_id, league['name'], league['matchIds'])
+            self._leagues[league_id] = instance
+            self._league_names[league['name'].lower()] = league_id
 
-    def getLeagueByName(self, leagueName):
+    def get_by_name(self, league_name):
         """
-        Return a league from the list by the league name
+        Return a league from the list by the league name.
+
         ARGS:
-            leagueName (str) - league name to search for
+            league_name (str) - league name to search for
         RETURNS:
             League (obj) - League object or None if not found
         """
-        for league in self._leagues.items():
-            if league.name.lower() == leagueName.lower():
-                return league
-        return None
+        if league_name.lower() in self._league_names:
+            return self._leagues.get(self._league_names[league_name.lower()])
 
-    def getLeagueById(self, leagueId):
+    def get_by_id(self, league_id):
         """
-        Return a league from the list by the league id
+        Return a league from the list by the league id.
+
         ARGS:
-            leagueId (int) - league id to search for
+            league_id (int) - league id to search for
         RETURNS:
             League (obj) - League object or None if not found
         """
-        if leagueId in self._leagues.keys():
-            return self._leagues[leagueId]
-        else:
-            return None
+        return self._leagues.get(league_id)
 
-class League():
+
+class League:
     """
-    League class to store and manipulate data relating to a league
-    Contains a match dictionary where each key is the season and item 
+    League class to store and manipulate data relating to a league.
+
+    Contains a match dictionary where each key is the season and value
     is a MatchList. To speed up performance MatchListLite can be used 
-    instead to avoid loading up all matches from the database
+    instead to avoid loading up all matches from the database.
     """
 
     @classmethod
-    def fromLeagueName(cls, name, initMatches=True):
+    def from_league_name(cls, name, init_matches=True):
         """
-        Create a League with the league name, returns None if league name not found
+        Create a League with the league name, returns None if league name not found.
+
         ARGS:
             name (str) - name of the league
-            initMatches (bool) - True = Load all match data into MatchList, False = Only store match ids in MatchList
+            init_matches (bool) - True = Load all match data into MatchList,
+                                 False = Only store match ids in MatchList
         """
-        for league in MATCH_IDS.keys():
+        for league in MATCH_IDS:
             if MATCH_IDS[league]['name'].lower() == name.lower():
-                return cls(league, name, initMatches=initMatches)
+                return cls(league, name, init_matches=init_matches)
         return None
 
-    def __init__(self, id, name, matchIdDict=None, initMatches=True):
+    def __init__(self, id, name, match_dict=None, init_matches=True):
         """
         ARGS:
             id (str) - id of the league
             name (str) - name of the league
-            matchIdDict (dict) - dictionary in the form {'season': [int(matchId), int(matchId)]}, loads from default if None
-            initMatches (bool) - True = Load all match data into MatchList, False = Only store match ids in MatchList
+            match_dict (dict) - dictionary in the form
+                                 {'season': [int(matchId), int(matchId)]},
+                                 loads from default if None
+            init_matches (bool) - True = Load all match data into MatchList,
+                                 False = Only store match ids in MatchList
         """
         self.id = id
         self.name = name
-        self._matchesLoaded = False
+        self._matches_loaded = False
         self._matches = {}
-        if matchIdDict is None:
-            matchIdDict = MATCH_IDS[self.id]['matchIds']
-        self.loadMatches(matchIdDict, initMatches)
+        if not match_dict:
+            match_dict = MATCH_IDS[self.id]['matchIds']
+        self.load_matches(match_dict, init_matches)
 
-    def loadMatches(self, matchIdDict, full=False):
+    def load_matches(self, match_dict, full=False):
         """
         Load match dictionary for the league where each key is a season and each item is a MatchList
-        ARGS:
-            matchIdDict (dict) - dictionary in the form {'season': [int(matchId), int(matchId)]}
-            full (bool) - True = Load all match data into MatchList, False = Only store match ids in MatchList
-        """
-        if full:
-            matchListClass = MatchList
-        else:
-            matchListClass = MatchListLite
-        
-        for season in matchIdDict:
-            self._matches[season] = matchListClass(matchIdDict[season])
 
-    def _getSeasonList(self, season=None):
+        ARGS:
+            match_dict (dict) - dictionary in the form
+                                 {'season': [int(matchId), int(matchId)]}
+            full (bool) - True = Load all match data into MatchList,
+                          False = Only store match ids in MatchList.
         """
-        Internal function to add a single season id to a list or return all seasons
+        match_list_class = MatchList if full else MatchListLite
+        
+        for season in match_dict:
+            self._matches[season] = match_list_class(match_dict[season])
+
+    def _get_season_ids(self, season=None):
+        """
+        Internal function to return a list with only single season id
+        or return all seasons.
+
         ARGS:
             season (str) - season name string, if None returns all seasons
         RETURNS
@@ -107,50 +124,51 @@ class League():
         """
         if season:
             return [season]
-        else:
-            return self._matches.keys()
+
+        return sorted(self._matches)
     
-    def getMatchIds(self, season=None):
+    def get_match_ids(self, season=None):
         """
         Return a list of match ids for the league, either for a specific season or all seasons
+
         ARGS:
             season (str) - season name string, if None returns all seasons
         RETURNS
             [str] - list of match ids
         """
-        matchIdList = []
-        for season in self._getSeasonList(season):
-            matchIdList.extend(self._matches[season].getMatchIds())
-        return matchIdList
+        match_id_list = []
+        for s_id in self._get_season_ids(season):
+            match_id_list.extend(self._matches[s_id].get_match_ids())
+        return match_id_list
 
-    def containsTeam(self, team, season=None):
+    def contains_team(self, team, season=None):
         """
-        Check if a team plays in a league
+        Check if a team plays in a league.
+
         ARGS:
             team (str) - team name to search for
             season (str) - season name string to search, if None searches all seasons
         RETURNS:
             bool - True if team is in the league, False if team is not in the league
         """
-        teams = []
-        for season in self._getSeasonList(season):
-            teams.extend(self._matches[season].getAllTeams())
+        teams = set()
+        for s_id in self._get_season_ids(season):
+            teams |= set(self._matches[s_id].get_all_teams())
         return team.lower() in teams
 
-    def getMatchesInDateRange(self, startDate=None, endDate=None):
+    def get_matches_in_range(self,
+                             start_date=datetime.min,
+                             end_date=datetime.max):
         """
-        Filter matches in the league for a given date range, returns a new MatchList
+        Filter matches in the league for a given date range, returns a new MatchList.
+
         ARGS:
-            startDate (datetime) - start date in range to search, default to datetime.min
-            endDate (datetime) - end date in range to search, default to datetime.max
+            start_date (datetime) - start date in range to search, default to datetime.min
+            end_date (datetime) - end date in range to search, default to datetime.max
         RETURNS:
             MatchList (obj) - return new MatchList object with matches in date range
         """
-        if startDate is None:
-            startDate = datetime.min
-        if endDate is None:
-            endDate = datetime.max
-        mergedMatchList = MatchList(matchIds=[])
-        for season in self._getSeasonList(None):
-            mergedMatchList += self._matches[season].getMatchesInDateRange(startDate, endDate)
-        return mergedMatchList
+        merged_match_list = MatchList(match_ids=[])
+        for season_id in self._get_season_ids():
+            merged_match_list += self._matches[season_id].get_matches_in_range(start_date, end_date)
+        return merged_match_list

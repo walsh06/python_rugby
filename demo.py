@@ -1,52 +1,53 @@
 from datetime import datetime
 
+import rugby_stats
 from league import League
 from match import MatchList, Match
 
-import rugby_stats
 
 # Load up a match, Wales v Scotland Six Nations 2018
-WalesVScotland = Match.fromMatchId(291689)
-print WalesVScotland
+wales_v_scotland = Match.from_match_id(291689)
+print(wales_v_scotland)
 # print out the tries in the match
-for tryEvent in WalesVScotland.matchEventList.getAllEventsForType(1):
-    print tryEvent
+for tryEvent in wales_v_scotland.match_event_list.get_events_for_type(1):
+    print(tryEvent)
 
 # Load the champions cup from the database
-championsCup = League.fromLeagueName('Champions Cup')
+champions_cup = League.from_league_name('Champions Cup')
 
 # get matches in the range of dates
 # in this example these dates encompass Round 2 matches
-startDate = datetime(2018,10,18)
-endDate = datetime(2018,10,22)
-roundTwoMatches = championsCup.getMatchesInDateRange(startDate, endDate)
+start_date = datetime(2018, 10, 18)
+end_date = datetime(2018, 10, 22)
+round_two_matches = champions_cup.get_matches_in_range(start_date, end_date)
 
 # Get the number of tackles for each player
-tackles = rugby_stats.getPlayerStatInMatches(roundTwoMatches, 'tackles')
-print "\nChampions Cup Round Two Top Tacklers"
+tackles = rugby_stats.get_players_stats(round_two_matches, 'tackles')
+print("\nChampions Cup Round Two Top Tacklers")
 for player in tackles[:10]:
-    print "Player: {}, Team: {}, Tackles: {}".format(player[0], player[1], player[2])
+    print("Player: {0}, Team: {1}, Tackles: {2}".format(*player))
 
 # Get the leaders across the full champions cup season
-leagueLeaders = rugby_stats.getLeagueLeadersForStatTotal('Champions Cup', '1819', 'tackles')
-print "\nChampions Cup Top Tacklers"
-for player in leagueLeaders[:10]:
-    print "Player: {}, Team: {}, Tackles: {}".format(player[0], player[1], player[2])
+league_leaders = rugby_stats.get_league_leaders_for_stat(
+    'Champions Cup', '1819', 'tackles',
+)
+print("\nChampions Cup Top Tacklers")
+for player in league_leaders[:10]:
+    print("Player: {0}, Team: {1}, Tackles: {2}".format(*player))
 
 # Now lets dig in and grab some information from the data instead of using the premade functions
 # With Connor Murray injured we will see who Munster is playing at scrum half instead
-munsterMatches = MatchList.createMatchListForTeam('munster', seasons=['1819'])
-scrumHalves = {}
-for match in munsterMatches:
+munster_matches = MatchList.create_for_team('munster', seasons=['1819'])
+scrum_halves = {}
+for match in munster_matches:
     # loop through all the players on the munster team
     for player in match.players['munster']:
         # check if the players position in the match is scrumhalf (SH)
         if player.position == "SH":
-            if player.name in scrumHalves:
-                scrumHalves[player.name] += 1
+            if player.name in scrum_halves:
+                scrum_halves[player.name] += 1
             else:
-                scrumHalves[player.name] = 1
-print "\nMunster Starting Scrumhalf"
-for scrumHalf in scrumHalves:
-    print "Player: {}, Starts: {}".format(scrumHalf, scrumHalves[scrumHalf])
-
+                scrum_halves[player.name] = 1
+print("\nMunster Starting Scrumhalf")
+for scrum_half in scrum_halves:
+    print("Player: {}, Starts: {}".format(scrum_half, scrum_halves[scrum_half]))
