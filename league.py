@@ -91,7 +91,7 @@ class League:
         """
         self.id = id
         self.name = name
-        self._matchesLoaded = False
+        self._matches_loaded = False
         self._matches = {}
         if not match_dict:
             match_dict = MATCH_IDS[self.id]['matchIds']

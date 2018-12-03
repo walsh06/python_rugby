@@ -1,16 +1,25 @@
-import time
 import datetime
+import time
 
 from league import League
 from match import MatchList, Match
-from rugbydb import RugbyDB
 from matchevent import MatchEvent, MatchEventList
+from rugbydb import RugbyDB
 
-SEXTON_CONV = {'homeScore': 0, 'awayScore': 7, 'time': "12'", 'type': 2,
-                   'text': 'Conversion - Johnny Sexton , Ireland', }
-
-ZEBO_TRY = {'homeScore': 0, 'awayScore': 5, 'time': "11'", 'type': 1,
-                       'text': 'Try - Simon Zebo , Ireland', }
+ZEBO_TRY = {
+    'homeScore': 0,
+    'awayScore': 5,
+    'time': "11'",
+    'type': 1,
+    'text': 'Try - Simon Zebo , Ireland',
+}
+SEXTON_CONV = {
+    'homeScore': 0,
+    'awayScore': 7,
+    'time': "12'",
+    'type': 2,
+    'text': 'Conversion - Johnny Sexton , Ireland',
+}
 
 
 class Timer:
@@ -115,11 +124,11 @@ def test_match_event_list():
 
 def test_player():
     m = Match.from_match_id('133782')
-    player = m.players[m.homeTeam['name']].get_player(0)
+    player = m.players[m.home_team['name']].get_player(0)
     check_result("Player  - get stat for player", player.get_stat, ['Tries'], 1)
     check_result("Player  - get wrong stat for player", player.get_stat, ['FakeStat'], None)
-    player.minutesPlayed = 20
-    player.matchStats['tries'] = 1
+    player.minutes_played = 20
+    player.match_stats['tries'] = 1
     check_result("Player - get stat per 80", player.get_stat_per_eighty, ['Tries'], 4)
 
 

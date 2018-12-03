@@ -16,36 +16,36 @@ class Player:
         self.id = player_dict['id']
         self.number = player_dict['number']
         self.position = player_dict['position']
-        self.isCaptain = player_dict['captain']
+        self.is_captain = player_dict['captain']
         self.subbed = player_dict['subbed']
-        self.eventTimes = player_dict['eventTimes']
-        self.matchStats = {}
+        self.event_times = player_dict['eventTimes']
+        self.match_stats = {}
         for key in player_dict:
             if isinstance(player_dict[key], dict) and key != 'eventTimes':
                 stat = player_dict[key]
-                self.matchStats[stat['name'].lower()] = float(stat['value'])
+                self.match_stats[stat['name'].lower()] = float(stat['value'])
 
-        missed_tck = self.matchStats.get('missed tackles', 0)
-        if self.matchStats['tackles'] >= missed_tck:
+        missed_tck = self.match_stats.get('missed tackles', 0)
+        if self.match_stats['tackles'] >= missed_tck:
             # adjust tackles to be completed tackles
-            self.matchStats['tackles'] -= missed_tck
-        self.matchEvents = MatchEventList.from_dict(player_dict['eventTimes'])
-        self.minutesPlayed = None
+            self.match_stats['tackles'] -= missed_tck
+        self.match_events = MatchEventList.from_dict(player_dict['eventTimes'])
+        self.minutes_played = None
         if match_event_list is not None:
             sub_events = []
             for event in match_event_list:
                 if (event.type in {7, 8}) and self.name in event.text:
                     sub_events.append((event.time, event.type))
             sub_on_time = 0
-            self.minutesPlayed = 0
+            self.minutes_played = 0
             for event in sorted(sub_events):
                 if event[1] == 7:
-                    self.minutesPlayed += event[0] - sub_on_time
+                    self.minutes_played += event[0] - sub_on_time
                     sub_on_time = -1
                 elif event[1] == 8:
                     sub_on_time = event[0]
             if not (int(self.number) > 15 and sub_on_time == 0) and sub_on_time != -1:
-                self.minutesPlayed += 80 - sub_on_time
+                self.minutes_played += 80 - sub_on_time
 
     def __str__(self):
         return "{}: {}".format(self.number, self.name)
@@ -59,7 +59,7 @@ class Player:
         RETURNS
             float - stat value, None if stat not found
         """
-        return self.matchStats.get(stat.lower())
+        return self.match_stats.get(stat.lower())
 
     def get_stat_average(self, stat):
         """
@@ -83,7 +83,7 @@ class Player:
         """
         stat_value = self.get_stat(stat)
         if stat_value:
-            stat_value = stat_value * (80.0 / self.minutesPlayed)
+            stat_value = stat_value * (80.0 / self.minutes_played)
         return stat_value
 
 
@@ -95,8 +95,7 @@ class PlayerList:
             player_dict_list ([dict]) - List of player dicts from the database
             match_event_list (MatchEventList) - MatchEventList object used to get minutes played
         """
-        self.players = [Player(playerDict, match_event_list)
-                        for playerDict in player_dict_list]
+        self.players = [Player(p, match_event_list) for p in player_dict_list]
 
     def __len__(self):
         """
@@ -176,7 +175,7 @@ class PlayerSeries(PlayerList):
             self.name = standard_info['name']
             self.id = standard_info['id']
 
-        self.players = [Player(player_dict) for player_dict in player_dict_list]
+        self.players = [Player(p) for p in player_dict_list]
 
     def __str__(self):
         return self.name

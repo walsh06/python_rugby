@@ -34,7 +34,7 @@ class RugbyDB:
         """
         Init and load the database
         """
-        self.dbPath = os.path.join(CWD, "rugby_database")
+        self.db_path = os.path.join(CWD, "rugby_database")
         self.db = {}
         self.load_db()
     
@@ -42,9 +42,9 @@ class RugbyDB:
         """
         Load the database into memory.
         """
-        for db in os.listdir(self.dbPath):
+        for db in os.listdir(self.db_path):
             if "backup" not in db:
-                with open(os.path.join(self.dbPath, db)) as dbFile:
+                with open(os.path.join(self.db_path, db)) as dbFile:
                     db_contents = dbFile.read()
                 league_dict = json.loads(db_contents)
                 self.db[os.path.splitext(db)[0]] = league_dict
@@ -131,9 +131,9 @@ class RugbyDBReadWrite(RugbyDB):
     def __init__(self):
         super(RugbyDBReadWrite, self).__init__()
         today = datetime.date.today()
-        self.dbWritePath = os.path.join(CWD, "rugby_database_{}".format(today))
-        if not os.path.exists(self.dbWritePath):
-            os.makedirs(self.dbWritePath)
+        self.db_write_path = os.path.join(CWD, "rugby_database_{}".format(today))
+        if not os.path.exists(self.db_write_path):
+            os.makedirs(self.db_write_path)
 
     def _write_file(self, league):
         """
@@ -142,7 +142,7 @@ class RugbyDBReadWrite(RugbyDB):
         ARGS:
             league (int) - league id to write file
         """
-        db_path = os.path.join(self.dbWritePath, "{}.db".format(league))
+        db_path = os.path.join(self.db_write_path, "{}.db".format(league))
         try:
             with open(db_path, "w") as db_file:
                 db_file.write(json.dumps(self.db[league], indent=4, sort_keys=True))
